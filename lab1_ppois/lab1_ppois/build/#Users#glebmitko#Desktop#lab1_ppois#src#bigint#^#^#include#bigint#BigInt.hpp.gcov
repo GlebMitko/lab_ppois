@@ -1,0 +1,100 @@
+        -:    0:Source:/Users/glebmitko/Desktop/lab1_ppois/src/bigint/../../include/bigint/BigInt.hpp
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/bigint/BigInt.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/bigint/BigInt.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#pragma once
+        -:    2:
+        -:    3:#include <string>
+        -:    4:#include <vector>
+        -:    5:#include <iostream>
+        -:    6:#include <stdexcept>
+        -:    7:
+        -:    8:namespace bigint {
+        -:    9:
+        -:   10:class BigInt {
+        -:   11:private:
+        -:   12:    std::vector<int> digits;
+        -:   13:    bool isNegative;
+        -:   14:    static const int BASE = 10000;
+        -:   15:    static const int BASE_DIGITS = 4;
+        -:   16:
+        -:   17:public:
+        -:   18:    BigInt();
+        -:   19:    BigInt(int number);
+        -:   20:    BigInt(const std::string& str);
+        -:   21:    BigInt(const char* str);
+function _ZN6bigint6BigIntC1ERKS0_ called 0 returned 0% blocks executed 0%
+function _ZN6bigint6BigIntC2ERKS0_ called 0 returned 0% blocks executed 0%
+    #####:   22:    BigInt(const BigInt& other) = default;
+function _ZN6bigint6BigIntD1Ev called 0 returned 0% blocks executed 0%
+function _ZN6bigint6BigIntD2Ev called 0 returned 0% blocks executed 0%
+    #####:   23:    ~BigInt() = default;
+function _ZN6bigint6BigIntaSERKS0_ called 248 returned 100% blocks executed 100%
+      248:   24:    BigInt& operator=(const BigInt& other) = default;
+        -:   25:    
+        -:   26:    BigInt operator+(const BigInt& other) const;
+        -:   27:    BigInt operator-(const BigInt& other) const;
+        -:   28:    BigInt operator*(const BigInt& other) const;
+        -:   29:    BigInt operator/(const BigInt& other) const;
+        -:   30:    
+        -:   31:    BigInt& operator+=(const BigInt& other);
+        -:   32:    BigInt& operator-=(const BigInt& other);
+        -:   33:    BigInt& operator*=(const BigInt& other);
+        -:   34:    BigInt& operator/=(const BigInt& other);
+        -:   35:    
+        -:   36:    BigInt operator+(int other) const;
+        -:   37:    BigInt operator-(int other) const;
+        -:   38:    BigInt operator*(int other) const;
+        -:   39:    BigInt operator/(int other) const;
+        -:   40:    
+        -:   41:    BigInt& operator+=(int other);
+        -:   42:    BigInt& operator-=(int other);
+        -:   43:    BigInt& operator*=(int other);
+        -:   44:    BigInt& operator/=(int other);
+        -:   45:    
+        -:   46:    BigInt operator-() const;
+        -:   47:    BigInt operator+() const;
+        -:   48:    
+        -:   49:    BigInt& operator++();
+        -:   50:    BigInt operator++(int);
+        -:   51:    BigInt& operator--();
+        -:   52:    BigInt operator--(int);
+        -:   53:    
+        -:   54:    bool operator==(const BigInt& other) const;
+        -:   55:    bool operator!=(const BigInt& other) const;
+        -:   56:    bool operator<(const BigInt& other) const;
+        -:   57:    bool operator<=(const BigInt& other) const;
+        -:   58:    bool operator>(const BigInt& other) const;
+        -:   59:    bool operator>=(const BigInt& other) const;
+        -:   60:    
+        -:   61:    bool operator==(int other) const;
+        -:   62:    bool operator!=(int other) const;
+        -:   63:    bool operator<(int other) const;
+        -:   64:    bool operator<=(int other) const;
+        -:   65:    bool operator>(int other) const;
+        -:   66:    bool operator>=(int other) const;
+        -:   67:    
+        -:   68:    explicit operator int() const;
+        -:   69:    std::string toString() const;
+        -:   70:    bool isZero() const;
+        -:   71:    size_t digitCount() const;
+        -:   72:    
+        -:   73:    friend std::ostream& operator<<(std::ostream& os, const BigInt& num);
+        -:   74:    friend std::istream& operator>>(std::istream& is, BigInt& num);
+        -:   75:
+        -:   76:private:
+        -:   77:    void normalize();
+        -:   78:    void fromString(const std::string& str);
+        -:   79:    void removeLeadingZeros();
+        -:   80:    int compare(const BigInt& other) const;
+        -:   81:    BigInt abs() const;
+        -:   82:    void add(const BigInt& other);
+        -:   83:    void subtract(const BigInt& other);
+        -:   84:    void multiply(const BigInt& other);
+        -:   85:    void divide(const BigInt& other);
+        -:   86:    void multiplyByDigit(int digit);
+        -:   87:    void shiftLeft(size_t positions);
+        -:   88:};
+        -:   89:
+        -:   90:}

@@ -1,0 +1,79 @@
+        -:    0:Source:/Users/glebmitko/Desktop/lab1_ppois/src/dictionary/../../include/dictionary/Dictionary.hpp
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/dictionary/Dictionary.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/dictionary/Dictionary.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#pragma once
+        -:    2:
+        -:    3:#include "DictionaryNode.hpp"
+        -:    4:#include <string>
+        -:    5:#include <memory>
+        -:    6:#include <fstream>
+        -:    7:
+        -:    8:namespace dictionary {
+        -:    9:
+        -:   10:class Dictionary {
+        -:   11:private:
+        -:   12:    std::unique_ptr<DictionaryNode> root;
+        -:   13:    size_t wordCount;
+        -:   14:    bool addWordInternal(const std::string& english, const std::string& russian);
+        -:   15:
+        -:   16:public:
+        -:   17:    Dictionary();
+function _ZN10dictionary10DictionaryD1Ev called 0 returned 0% blocks executed 0%
+function _ZN10dictionary10DictionaryD2Ev called 0 returned 0% blocks executed 0%
+    #####:   18:    ~Dictionary() = default;
+        -:   19:    Dictionary(const Dictionary& other);
+        -:   20:    Dictionary& operator=(const Dictionary& other);
+        -:   21:    
+        -:   22:
+        -:   23:    bool addWord(const std::string& english, const std::string& russian);
+        -:   24:    bool addWord(const char* english, const char* russian);
+        -:   25:    Dictionary& operator+=(const std::pair<std::string, std::string>& pair);
+        -:   26:    Dictionary& operator+=(const std::pair<const char*, const char*>& pair);
+        -:   27:    
+        -:   28:
+        -:   29:    bool removeWord(const std::string& english);
+        -:   30:    bool removeWord(const char* english);
+        -:   31:    Dictionary operator-(const std::string& english) const;
+        -:   32:    Dictionary operator-(const char* english) const;
+        -:   33:    Dictionary& operator-=(const std::string& english);
+        -:   34:    Dictionary& operator-=(const char* english);
+        -:   35:    
+        -:   36:
+        -:   37:    std::string operator[](const std::string& english) const;
+        -:   38:    std::string& operator[](const std::string& english);
+        -:   39:    
+        -:   40:
+        -:   41:    size_t getWordCount() const;
+        -:   42:    
+        -:   43:
+        -:   44:    bool loadFromFile(const std::string& filename);
+        -:   45:    bool saveToFile(const std::string& filename) const;
+        -:   46:    
+        -:   47:
+        -:   48:    bool operator==(const Dictionary& other) const;
+        -:   49:    bool operator!=(const Dictionary& other) const;
+        -:   50:    
+        -:   51:
+        -:   52:    friend std::ostream& operator<<(std::ostream& os, const Dictionary& dict);
+        -:   53:    friend std::istream& operator>>(std::istream& is, Dictionary& dict);
+        -:   54:
+        -:   55:private:
+        -:   56:
+        -:   57:    DictionaryNode* findWord(DictionaryNode* node, const std::string& english) const;
+        -:   58:    DictionaryNode* findWordForModification(std::unique_ptr<DictionaryNode>& node, const std::string& english);
+        -:   59:    
+        -:   60:
+        -:   61:    bool insertWord(std::unique_ptr<DictionaryNode>& node, const std::string& english, const std::string& russian);
+        -:   62:    bool deleteWord(std::unique_ptr<DictionaryNode>& node, const std::string& english);
+        -:   63:    DictionaryNode* findMin(DictionaryNode* node) const;
+        -:   64:    void copyTree(const std::unique_ptr<DictionaryNode>& source, std::unique_ptr<DictionaryNode>& destination);
+        -:   65:    bool compareTrees(const DictionaryNode* node1, const DictionaryNode* node2) const;
+        -:   66:    
+        -:   67:
+        -:   68:    void printTree(std::ostream& os, const DictionaryNode* node) const;
+        -:   69:    void readTree(std::istream& is, std::unique_ptr<DictionaryNode>& node);
+        -:   70:};
+        -:   71:
+        -:   72:}

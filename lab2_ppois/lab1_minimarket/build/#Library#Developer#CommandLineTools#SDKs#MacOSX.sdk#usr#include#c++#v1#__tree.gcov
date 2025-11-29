@@ -1,0 +1,2919 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__tree
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:// -*- C++ -*-
+        -:    2://===----------------------------------------------------------------------===//
+        -:    3://
+        -:    4:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    5:// See https://llvm.org/LICENSE.txt for license information.
+        -:    6:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    7://
+        -:    8://===----------------------------------------------------------------------===//
+        -:    9:
+        -:   10:#ifndef _LIBCPP___TREE
+        -:   11:#define _LIBCPP___TREE
+        -:   12:
+        -:   13:#include <__algorithm/min.h>
+        -:   14:#include <__assert>
+        -:   15:#include <__config>
+        -:   16:#include <__functional/invoke.h>
+        -:   17:#include <__iterator/distance.h>
+        -:   18:#include <__iterator/iterator_traits.h>
+        -:   19:#include <__iterator/next.h>
+        -:   20:#include <__memory/addressof.h>
+        -:   21:#include <__memory/allocator_traits.h>
+        -:   22:#include <__memory/compressed_pair.h>
+        -:   23:#include <__memory/pointer_traits.h>
+        -:   24:#include <__memory/swap_allocator.h>
+        -:   25:#include <__memory/unique_ptr.h>
+        -:   26:#include <__type_traits/can_extract_key.h>
+        -:   27:#include <__type_traits/conditional.h>
+        -:   28:#include <__type_traits/is_const.h>
+        -:   29:#include <__type_traits/is_copy_constructible.h>
+        -:   30:#include <__type_traits/is_nothrow_copy_constructible.h>
+        -:   31:#include <__type_traits/is_nothrow_default_constructible.h>
+        -:   32:#include <__type_traits/is_nothrow_move_assignable.h>
+        -:   33:#include <__type_traits/is_nothrow_move_constructible.h>
+        -:   34:#include <__type_traits/is_pointer.h>
+        -:   35:#include <__type_traits/is_same.h>
+        -:   36:#include <__type_traits/is_swappable.h>
+        -:   37:#include <__type_traits/remove_const_ref.h>
+        -:   38:#include <__type_traits/remove_cvref.h>
+        -:   39:#include <__utility/forward.h>
+        -:   40:#include <__utility/move.h>
+        -:   41:#include <__utility/pair.h>
+        -:   42:#include <__utility/swap.h>
+        -:   43:#include <limits>
+        -:   44:#include <stdexcept>
+        -:   45:
+        -:   46:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   47:#  pragma GCC system_header
+        -:   48:#endif
+        -:   49:
+        -:   50:_LIBCPP_PUSH_MACROS
+        -:   51:#include <__undef_macros>
+        -:   52:
+        -:   53:
+        -:   54:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   55:
+        -:   56:template <class, class, class, class> class _LIBCPP_TEMPLATE_VIS map;
+        -:   57:template <class, class, class, class> class _LIBCPP_TEMPLATE_VIS multimap;
+        -:   58:template <class, class, class> class _LIBCPP_TEMPLATE_VIS set;
+        -:   59:template <class, class, class> class _LIBCPP_TEMPLATE_VIS multiset;
+        -:   60:
+        -:   61:template <class _Tp, class _Compare, class _Allocator> class __tree;
+        -:   62:template <class _Tp, class _NodePtr, class _DiffType>
+        -:   63:    class _LIBCPP_TEMPLATE_VIS __tree_iterator;
+        -:   64:template <class _Tp, class _ConstNodePtr, class _DiffType>
+        -:   65:    class _LIBCPP_TEMPLATE_VIS __tree_const_iterator;
+        -:   66:
+        -:   67:template <class _Pointer> class __tree_end_node;
+        -:   68:template <class _VoidPtr> class __tree_node_base;
+        -:   69:template <class _Tp, class _VoidPtr> class __tree_node;
+        -:   70:
+        -:   71:template <class _Key, class _Value>
+        -:   72:struct __value_type;
+        -:   73:
+        -:   74:template <class _Allocator> class __map_node_destructor;
+        -:   75:template <class _TreeIterator> class _LIBCPP_TEMPLATE_VIS __map_iterator;
+        -:   76:template <class _TreeIterator> class _LIBCPP_TEMPLATE_VIS __map_const_iterator;
+        -:   77:
+        -:   78:/*
+        -:   79:
+        -:   80:_NodePtr algorithms
+        -:   81:
+        -:   82:The algorithms taking _NodePtr are red black tree algorithms.  Those
+        -:   83:algorithms taking a parameter named __root should assume that __root
+        -:   84:points to a proper red black tree (unless otherwise specified).
+        -:   85:
+        -:   86:Each algorithm herein assumes that __root->__parent_ points to a non-null
+        -:   87:structure which has a member __left_ which points back to __root.  No other
+        -:   88:member is read or written to at __root->__parent_.
+        -:   89:
+        -:   90:__root->__parent_ will be referred to below (in comments only) as end_node.
+        -:   91:end_node->__left_ is an externably accessible lvalue for __root, and can be
+        -:   92:changed by node insertion and removal (without explicit reference to end_node).
+        -:   93:
+        -:   94:All nodes (with the exception of end_node), even the node referred to as
+        -:   95:__root, have a non-null __parent_ field.
+        -:   96:
+        -:   97:*/
+        -:   98:
+        -:   99:// Returns:  true if __x is a left child of its parent, else false
+        -:  100:// Precondition:  __x != nullptr.
+        -:  101:template <class _NodePtr>
+        -:  102:inline _LIBCPP_INLINE_VISIBILITY
+        -:  103:bool
+function _ZNSt3__120__tree_is_left_childB8ue170006IPNS_16__tree_node_baseIPvEEEEbT_ called 0 returned 0% blocks executed 0%
+    #####:  104:__tree_is_left_child(_NodePtr __x) _NOEXCEPT
+        -:  105:{
+    #####:  106:    return __x == __x->__parent_->__left_;
+        -:  107:}
+        -:  108:
+        -:  109:// Determines if the subtree rooted at __x is a proper red black subtree.  If
+        -:  110://    __x is a proper subtree, returns the black height (null counts as 1).  If
+        -:  111://    __x is an improper subtree, returns 0.
+        -:  112:template <class _NodePtr>
+        -:  113:unsigned
+        -:  114:__tree_sub_invariant(_NodePtr __x)
+        -:  115:{
+        -:  116:    if (__x == nullptr)
+        -:  117:        return 1;
+        -:  118:    // parent consistency checked by caller
+        -:  119:    // check __x->__left_ consistency
+        -:  120:    if (__x->__left_ != nullptr && __x->__left_->__parent_ != __x)
+        -:  121:        return 0;
+        -:  122:    // check __x->__right_ consistency
+        -:  123:    if (__x->__right_ != nullptr && __x->__right_->__parent_ != __x)
+        -:  124:        return 0;
+        -:  125:    // check __x->__left_ != __x->__right_ unless both are nullptr
+        -:  126:    if (__x->__left_ == __x->__right_ && __x->__left_ != nullptr)
+        -:  127:        return 0;
+        -:  128:    // If this is red, neither child can be red
+        -:  129:    if (!__x->__is_black_)
+        -:  130:    {
+        -:  131:        if (__x->__left_ && !__x->__left_->__is_black_)
+        -:  132:            return 0;
+        -:  133:        if (__x->__right_ && !__x->__right_->__is_black_)
+        -:  134:            return 0;
+        -:  135:    }
+        -:  136:    unsigned __h = _VSTD::__tree_sub_invariant(__x->__left_);
+        -:  137:    if (__h == 0)
+        -:  138:        return 0;  // invalid left subtree
+        -:  139:    if (__h != _VSTD::__tree_sub_invariant(__x->__right_))
+        -:  140:        return 0;  // invalid or different height right subtree
+        -:  141:    return __h + __x->__is_black_;  // return black height of this node
+        -:  142:}
+        -:  143:
+        -:  144:// Determines if the red black tree rooted at __root is a proper red black tree.
+        -:  145://    __root == nullptr is a proper tree.  Returns true is __root is a proper
+        -:  146://    red black tree, else returns false.
+        -:  147:template <class _NodePtr>
+        -:  148:_LIBCPP_HIDE_FROM_ABI bool
+        -:  149:__tree_invariant(_NodePtr __root)
+        -:  150:{
+        -:  151:    if (__root == nullptr)
+        -:  152:        return true;
+        -:  153:    // check __x->__parent_ consistency
+        -:  154:    if (__root->__parent_ == nullptr)
+        -:  155:        return false;
+        -:  156:    if (!_VSTD::__tree_is_left_child(__root))
+        -:  157:        return false;
+        -:  158:    // root must be black
+        -:  159:    if (!__root->__is_black_)
+        -:  160:        return false;
+        -:  161:    // do normal node checks
+        -:  162:    return _VSTD::__tree_sub_invariant(__root) != 0;
+        -:  163:}
+        -:  164:
+        -:  165:// Returns:  pointer to the left-most node under __x.
+        -:  166:template <class _NodePtr>
+        -:  167:inline _LIBCPP_INLINE_VISIBILITY
+        -:  168:_NodePtr
+        -:  169:__tree_min(_NodePtr __x) _NOEXCEPT
+        -:  170:{
+        -:  171:    _LIBCPP_ASSERT_INTERNAL(__x != nullptr, "Root node shouldn't be null");
+        -:  172:    while (__x->__left_ != nullptr)
+        -:  173:        __x = __x->__left_;
+        -:  174:    return __x;
+        -:  175:}
+        -:  176:
+        -:  177:// Returns:  pointer to the right-most node under __x.
+        -:  178:template <class _NodePtr>
+        -:  179:inline _LIBCPP_INLINE_VISIBILITY
+        -:  180:_NodePtr
+        -:  181:__tree_max(_NodePtr __x) _NOEXCEPT
+        -:  182:{
+        -:  183:    _LIBCPP_ASSERT_INTERNAL(__x != nullptr, "Root node shouldn't be null");
+        -:  184:    while (__x->__right_ != nullptr)
+        -:  185:        __x = __x->__right_;
+        -:  186:    return __x;
+        -:  187:}
+        -:  188:
+        -:  189:// Returns:  pointer to the next in-order node after __x.
+        -:  190:template <class _NodePtr>
+        -:  191:_LIBCPP_HIDE_FROM_ABI _NodePtr
+        -:  192:__tree_next(_NodePtr __x) _NOEXCEPT
+        -:  193:{
+        -:  194:    _LIBCPP_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
+        -:  195:    if (__x->__right_ != nullptr)
+        -:  196:        return _VSTD::__tree_min(__x->__right_);
+        -:  197:    while (!_VSTD::__tree_is_left_child(__x))
+        -:  198:        __x = __x->__parent_unsafe();
+        -:  199:    return __x->__parent_unsafe();
+        -:  200:}
+        -:  201:
+        -:  202:template <class _EndNodePtr, class _NodePtr>
+        -:  203:inline _LIBCPP_INLINE_VISIBILITY
+        -:  204:_EndNodePtr
+        -:  205:__tree_next_iter(_NodePtr __x) _NOEXCEPT
+        -:  206:{
+        -:  207:    _LIBCPP_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
+        -:  208:    if (__x->__right_ != nullptr)
+        -:  209:        return static_cast<_EndNodePtr>(_VSTD::__tree_min(__x->__right_));
+        -:  210:    while (!_VSTD::__tree_is_left_child(__x))
+        -:  211:        __x = __x->__parent_unsafe();
+        -:  212:    return static_cast<_EndNodePtr>(__x->__parent_);
+        -:  213:}
+        -:  214:
+        -:  215:// Returns:  pointer to the previous in-order node before __x.
+        -:  216:// Note: __x may be the end node.
+        -:  217:template <class _NodePtr, class _EndNodePtr>
+        -:  218:inline _LIBCPP_INLINE_VISIBILITY
+        -:  219:_NodePtr
+        -:  220:__tree_prev_iter(_EndNodePtr __x) _NOEXCEPT
+        -:  221:{
+        -:  222:    _LIBCPP_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
+        -:  223:    if (__x->__left_ != nullptr)
+        -:  224:        return _VSTD::__tree_max(__x->__left_);
+        -:  225:    _NodePtr __xx = static_cast<_NodePtr>(__x);
+        -:  226:    while (_VSTD::__tree_is_left_child(__xx))
+        -:  227:        __xx = __xx->__parent_unsafe();
+        -:  228:    return __xx->__parent_unsafe();
+        -:  229:}
+        -:  230:
+        -:  231:// Returns:  pointer to a node which has no children
+        -:  232:template <class _NodePtr>
+        -:  233:_LIBCPP_HIDE_FROM_ABI _NodePtr
+        -:  234:__tree_leaf(_NodePtr __x) _NOEXCEPT
+        -:  235:{
+        -:  236:    _LIBCPP_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
+        -:  237:    while (true)
+        -:  238:    {
+        -:  239:        if (__x->__left_ != nullptr)
+        -:  240:        {
+        -:  241:            __x = __x->__left_;
+        -:  242:            continue;
+        -:  243:        }
+        -:  244:        if (__x->__right_ != nullptr)
+        -:  245:        {
+        -:  246:            __x = __x->__right_;
+        -:  247:            continue;
+        -:  248:        }
+        -:  249:        break;
+        -:  250:    }
+        -:  251:    return __x;
+        -:  252:}
+        -:  253:
+        -:  254:// Effects:  Makes __x->__right_ the subtree root with __x as its left child
+        -:  255://           while preserving in-order order.
+        -:  256:template <class _NodePtr>
+        -:  257:_LIBCPP_HIDE_FROM_ABI void
+function _ZNSt3__118__tree_left_rotateB8ue170006IPNS_16__tree_node_baseIPvEEEEvT_ called 0 returned 0% blocks executed 0%
+    #####:  258:__tree_left_rotate(_NodePtr __x) _NOEXCEPT
+        -:  259:{
+        -:  260:    _LIBCPP_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
+        -:  261:    _LIBCPP_ASSERT_INTERNAL(__x->__right_ != nullptr, "node should have a right child");
+    #####:  262:    _NodePtr __y = __x->__right_;
+    #####:  263:    __x->__right_ = __y->__left_;
+    #####:  264:    if (__x->__right_ != nullptr)
+branch  0 never executed
+branch  1 never executed
+    #####:  265:        __x->__right_->__set_parent(__x);
+branch  0 never executed
+branch  1 never executed
+    #####:  266:    __y->__parent_ = __x->__parent_;
+    #####:  267:    if (_VSTD::__tree_is_left_child(__x))
+branch  0 never executed
+branch  1 never executed
+    #####:  268:        __x->__parent_->__left_ = __y;
+        -:  269:    else
+    #####:  270:        __x->__parent_unsafe()->__right_ = __y;
+    #####:  271:    __y->__left_ = __x;
+    #####:  272:    __x->__set_parent(__y);
+branch  0 never executed
+branch  1 never executed
+    #####:  273:}
+        -:  274:
+        -:  275:// Effects:  Makes __x->__left_ the subtree root with __x as its right child
+        -:  276://           while preserving in-order order.
+        -:  277:template <class _NodePtr>
+        -:  278:_LIBCPP_HIDE_FROM_ABI void
+function _ZNSt3__119__tree_right_rotateB8ue170006IPNS_16__tree_node_baseIPvEEEEvT_ called 0 returned 0% blocks executed 0%
+    #####:  279:__tree_right_rotate(_NodePtr __x) _NOEXCEPT
+        -:  280:{
+        -:  281:    _LIBCPP_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
+        -:  282:    _LIBCPP_ASSERT_INTERNAL(__x->__left_ != nullptr, "node should have a left child");
+    #####:  283:    _NodePtr __y = __x->__left_;
+    #####:  284:    __x->__left_ = __y->__right_;
+    #####:  285:    if (__x->__left_ != nullptr)
+branch  0 never executed
+branch  1 never executed
+    #####:  286:        __x->__left_->__set_parent(__x);
+    #####:  287:    __y->__parent_ = __x->__parent_;
+    #####:  288:    if (_VSTD::__tree_is_left_child(__x))
+branch  0 never executed
+branch  1 never executed
+    #####:  289:        __x->__parent_->__left_ = __y;
+        -:  290:    else
+    #####:  291:        __x->__parent_unsafe()->__right_ = __y;
+    #####:  292:    __y->__right_ = __x;
+    #####:  293:    __x->__set_parent(__y);
+    #####:  294:}
+        -:  295:
+        -:  296:// Effects:  Rebalances __root after attaching __x to a leaf.
+        -:  297:// Precondition:  __x has no children.
+        -:  298://                __x == __root or == a direct or indirect child of __root.
+        -:  299://                If __x were to be unlinked from __root (setting __root to
+        -:  300://                  nullptr if __root == __x), __tree_invariant(__root) == true.
+        -:  301:// Postcondition: __tree_invariant(end_node->__left_) == true.  end_node->__left_
+        -:  302://                may be different than the value passed in as __root.
+        -:  303:template <class _NodePtr>
+        -:  304:_LIBCPP_HIDE_FROM_ABI void
+function _ZNSt3__127__tree_balance_after_insertB8ue170006IPNS_16__tree_node_baseIPvEEEEvT_S5_ called 0 returned 0% blocks executed 0%
+    #####:  305:__tree_balance_after_insert(_NodePtr __root, _NodePtr __x) _NOEXCEPT
+        -:  306:{
+        -:  307:    _LIBCPP_ASSERT_INTERNAL(__root != nullptr, "Root of the tree shouldn't be null");
+        -:  308:    _LIBCPP_ASSERT_INTERNAL(__x != nullptr, "Can't attach null node to a leaf");
+    #####:  309:    __x->__is_black_ = __x == __root;
+    #####:  310:    while (__x != __root && !__x->__parent_unsafe()->__is_black_)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  311:    {
+        -:  312:        // __x->__parent_ != __root because __x->__parent_->__is_black == false
+    #####:  313:        if (_VSTD::__tree_is_left_child(__x->__parent_unsafe()))
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  314:        {
+    #####:  315:            _NodePtr __y = __x->__parent_unsafe()->__parent_unsafe()->__right_;
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  316:            if (__y != nullptr && !__y->__is_black_)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  317:            {
+    #####:  318:                __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  319:                __x->__is_black_ = true;
+    #####:  320:                __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  321:                __x->__is_black_ = __x == __root;
+    #####:  322:                __y->__is_black_ = true;
+    #####:  323:            }
+        -:  324:            else
+        -:  325:            {
+    #####:  326:                if (!_VSTD::__tree_is_left_child(__x))
+branch  0 never executed
+branch  1 never executed
+        -:  327:                {
+    #####:  328:                    __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  329:                    _VSTD::__tree_left_rotate(__x);
+    #####:  330:                }
+    #####:  331:                __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  332:                __x->__is_black_ = true;
+    #####:  333:                __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  334:                __x->__is_black_ = false;
+    #####:  335:                _VSTD::__tree_right_rotate(__x);
+    #####:  336:                break;
+        -:  337:            }
+    #####:  338:        }
+        -:  339:        else
+        -:  340:        {
+    #####:  341:            _NodePtr __y = __x->__parent_unsafe()->__parent_->__left_;
+branch  0 never executed
+branch  1 never executed
+    #####:  342:            if (__y != nullptr && !__y->__is_black_)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  343:            {
+    #####:  344:                __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  345:                __x->__is_black_ = true;
+    #####:  346:                __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  347:                __x->__is_black_ = __x == __root;
+    #####:  348:                __y->__is_black_ = true;
+    #####:  349:            }
+        -:  350:            else
+        -:  351:            {
+    #####:  352:                if (_VSTD::__tree_is_left_child(__x))
+branch  0 never executed
+branch  1 never executed
+        -:  353:                {
+    #####:  354:                    __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  355:                    _VSTD::__tree_right_rotate(__x);
+    #####:  356:                }
+    #####:  357:                __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  358:                __x->__is_black_ = true;
+    #####:  359:                __x = __x->__parent_unsafe();
+branch  0 never executed
+branch  1 never executed
+    #####:  360:                __x->__is_black_ = false;
+    #####:  361:                _VSTD::__tree_left_rotate(__x);
+    #####:  362:                break;
+        -:  363:            }
+        -:  364:        }
+        -:  365:    }
+    #####:  366:}
+        -:  367:
+        -:  368:// Precondition:  __z == __root or == a direct or indirect child of __root.
+        -:  369:// Effects:  unlinks __z from the tree rooted at __root, rebalancing as needed.
+        -:  370:// Postcondition: __tree_invariant(end_node->__left_) == true && end_node->__left_
+        -:  371://                nor any of its children refer to __z.  end_node->__left_
+        -:  372://                may be different than the value passed in as __root.
+        -:  373:template <class _NodePtr>
+        -:  374:_LIBCPP_HIDE_FROM_ABI void
+        -:  375:__tree_remove(_NodePtr __root, _NodePtr __z) _NOEXCEPT
+        -:  376:{
+        -:  377:    _LIBCPP_ASSERT_INTERNAL(__root != nullptr, "Root node should not be null");
+        -:  378:    _LIBCPP_ASSERT_INTERNAL(__z != nullptr, "The node to remove should not be null");
+        -:  379:    _LIBCPP_ASSERT_INTERNAL(std::__tree_invariant(__root), "The tree invariants should hold");
+        -:  380:    // __z will be removed from the tree.  Client still needs to destruct/deallocate it
+        -:  381:    // __y is either __z, or if __z has two children, __tree_next(__z).
+        -:  382:    // __y will have at most one child.
+        -:  383:    // __y will be the initial hole in the tree (make the hole at a leaf)
+        -:  384:    _NodePtr __y = (__z->__left_ == nullptr || __z->__right_ == nullptr) ?
+        -:  385:                    __z : _VSTD::__tree_next(__z);
+        -:  386:    // __x is __y's possibly null single child
+        -:  387:    _NodePtr __x = __y->__left_ != nullptr ? __y->__left_ : __y->__right_;
+        -:  388:    // __w is __x's possibly null uncle (will become __x's sibling)
+        -:  389:    _NodePtr __w = nullptr;
+        -:  390:    // link __x to __y's parent, and find __w
+        -:  391:    if (__x != nullptr)
+        -:  392:        __x->__parent_ = __y->__parent_;
+        -:  393:    if (_VSTD::__tree_is_left_child(__y))
+        -:  394:    {
+        -:  395:        __y->__parent_->__left_ = __x;
+        -:  396:        if (__y != __root)
+        -:  397:            __w = __y->__parent_unsafe()->__right_;
+        -:  398:        else
+        -:  399:            __root = __x;  // __w == nullptr
+        -:  400:    }
+        -:  401:    else
+        -:  402:    {
+        -:  403:        __y->__parent_unsafe()->__right_ = __x;
+        -:  404:        // __y can't be root if it is a right child
+        -:  405:        __w = __y->__parent_->__left_;
+        -:  406:    }
+        -:  407:    bool __removed_black = __y->__is_black_;
+        -:  408:    // If we didn't remove __z, do so now by splicing in __y for __z,
+        -:  409:    //    but copy __z's color.  This does not impact __x or __w.
+        -:  410:    if (__y != __z)
+        -:  411:    {
+        -:  412:        // __z->__left_ != nulptr but __z->__right_ might == __x == nullptr
+        -:  413:        __y->__parent_ = __z->__parent_;
+        -:  414:        if (_VSTD::__tree_is_left_child(__z))
+        -:  415:            __y->__parent_->__left_ = __y;
+        -:  416:        else
+        -:  417:            __y->__parent_unsafe()->__right_ = __y;
+        -:  418:        __y->__left_ = __z->__left_;
+        -:  419:        __y->__left_->__set_parent(__y);
+        -:  420:        __y->__right_ = __z->__right_;
+        -:  421:        if (__y->__right_ != nullptr)
+        -:  422:            __y->__right_->__set_parent(__y);
+        -:  423:        __y->__is_black_ = __z->__is_black_;
+        -:  424:        if (__root == __z)
+        -:  425:            __root = __y;
+        -:  426:    }
+        -:  427:    // There is no need to rebalance if we removed a red, or if we removed
+        -:  428:    //     the last node.
+        -:  429:    if (__removed_black && __root != nullptr)
+        -:  430:    {
+        -:  431:        // Rebalance:
+        -:  432:        // __x has an implicit black color (transferred from the removed __y)
+        -:  433:        //    associated with it, no matter what its color is.
+        -:  434:        // If __x is __root (in which case it can't be null), it is supposed
+        -:  435:        //    to be black anyway, and if it is doubly black, then the double
+        -:  436:        //    can just be ignored.
+        -:  437:        // If __x is red (in which case it can't be null), then it can absorb
+        -:  438:        //    the implicit black just by setting its color to black.
+        -:  439:        // Since __y was black and only had one child (which __x points to), __x
+        -:  440:        //   is either red with no children, else null, otherwise __y would have
+        -:  441:        //   different black heights under left and right pointers.
+        -:  442:        // if (__x == __root || __x != nullptr && !__x->__is_black_)
+        -:  443:        if (__x != nullptr)
+        -:  444:            __x->__is_black_ = true;
+        -:  445:        else
+        -:  446:        {
+        -:  447:            //  Else __x isn't root, and is "doubly black", even though it may
+        -:  448:            //     be null.  __w can not be null here, else the parent would
+        -:  449:            //     see a black height >= 2 on the __x side and a black height
+        -:  450:            //     of 1 on the __w side (__w must be a non-null black or a red
+        -:  451:            //     with a non-null black child).
+        -:  452:            while (true)
+        -:  453:            {
+        -:  454:                if (!_VSTD::__tree_is_left_child(__w))  // if x is left child
+        -:  455:                {
+        -:  456:                    if (!__w->__is_black_)
+        -:  457:                    {
+        -:  458:                        __w->__is_black_ = true;
+        -:  459:                        __w->__parent_unsafe()->__is_black_ = false;
+        -:  460:                        _VSTD::__tree_left_rotate(__w->__parent_unsafe());
+        -:  461:                        // __x is still valid
+        -:  462:                        // reset __root only if necessary
+        -:  463:                        if (__root == __w->__left_)
+        -:  464:                            __root = __w;
+        -:  465:                        // reset sibling, and it still can't be null
+        -:  466:                        __w = __w->__left_->__right_;
+        -:  467:                    }
+        -:  468:                    // __w->__is_black_ is now true, __w may have null children
+        -:  469:                    if ((__w->__left_  == nullptr || __w->__left_->__is_black_) &&
+        -:  470:                        (__w->__right_ == nullptr || __w->__right_->__is_black_))
+        -:  471:                    {
+        -:  472:                        __w->__is_black_ = false;
+        -:  473:                        __x = __w->__parent_unsafe();
+        -:  474:                        // __x can no longer be null
+        -:  475:                        if (__x == __root || !__x->__is_black_)
+        -:  476:                        {
+        -:  477:                            __x->__is_black_ = true;
+        -:  478:                            break;
+        -:  479:                        }
+        -:  480:                        // reset sibling, and it still can't be null
+        -:  481:                        __w = _VSTD::__tree_is_left_child(__x) ?
+        -:  482:                                    __x->__parent_unsafe()->__right_ :
+        -:  483:                                    __x->__parent_->__left_;
+        -:  484:                        // continue;
+        -:  485:                    }
+        -:  486:                    else  // __w has a red child
+        -:  487:                    {
+        -:  488:                        if (__w->__right_ == nullptr || __w->__right_->__is_black_)
+        -:  489:                        {
+        -:  490:                            // __w left child is non-null and red
+        -:  491:                            __w->__left_->__is_black_ = true;
+        -:  492:                            __w->__is_black_ = false;
+        -:  493:                            _VSTD::__tree_right_rotate(__w);
+        -:  494:                            // __w is known not to be root, so root hasn't changed
+        -:  495:                            // reset sibling, and it still can't be null
+        -:  496:                            __w = __w->__parent_unsafe();
+        -:  497:                        }
+        -:  498:                        // __w has a right red child, left child may be null
+        -:  499:                        __w->__is_black_ = __w->__parent_unsafe()->__is_black_;
+        -:  500:                        __w->__parent_unsafe()->__is_black_ = true;
+        -:  501:                        __w->__right_->__is_black_ = true;
+        -:  502:                        _VSTD::__tree_left_rotate(__w->__parent_unsafe());
+        -:  503:                        break;
+        -:  504:                    }
+        -:  505:                }
+        -:  506:                else
+        -:  507:                {
+        -:  508:                    if (!__w->__is_black_)
+        -:  509:                    {
+        -:  510:                        __w->__is_black_ = true;
+        -:  511:                        __w->__parent_unsafe()->__is_black_ = false;
+        -:  512:                        _VSTD::__tree_right_rotate(__w->__parent_unsafe());
+        -:  513:                        // __x is still valid
+        -:  514:                        // reset __root only if necessary
+        -:  515:                        if (__root == __w->__right_)
+        -:  516:                            __root = __w;
+        -:  517:                        // reset sibling, and it still can't be null
+        -:  518:                        __w = __w->__right_->__left_;
+        -:  519:                    }
+        -:  520:                    // __w->__is_black_ is now true, __w may have null children
+        -:  521:                    if ((__w->__left_  == nullptr || __w->__left_->__is_black_) &&
+        -:  522:                        (__w->__right_ == nullptr || __w->__right_->__is_black_))
+        -:  523:                    {
+        -:  524:                        __w->__is_black_ = false;
+        -:  525:                        __x = __w->__parent_unsafe();
+        -:  526:                        // __x can no longer be null
+        -:  527:                        if (!__x->__is_black_ || __x == __root)
+        -:  528:                        {
+        -:  529:                            __x->__is_black_ = true;
+        -:  530:                            break;
+        -:  531:                        }
+        -:  532:                        // reset sibling, and it still can't be null
+        -:  533:                        __w = _VSTD::__tree_is_left_child(__x) ?
+        -:  534:                                    __x->__parent_unsafe()->__right_ :
+        -:  535:                                    __x->__parent_->__left_;
+        -:  536:                        // continue;
+        -:  537:                    }
+        -:  538:                    else  // __w has a red child
+        -:  539:                    {
+        -:  540:                        if (__w->__left_ == nullptr || __w->__left_->__is_black_)
+        -:  541:                        {
+        -:  542:                            // __w right child is non-null and red
+        -:  543:                            __w->__right_->__is_black_ = true;
+        -:  544:                            __w->__is_black_ = false;
+        -:  545:                            _VSTD::__tree_left_rotate(__w);
+        -:  546:                            // __w is known not to be root, so root hasn't changed
+        -:  547:                            // reset sibling, and it still can't be null
+        -:  548:                            __w = __w->__parent_unsafe();
+        -:  549:                        }
+        -:  550:                        // __w has a left red child, right child may be null
+        -:  551:                        __w->__is_black_ = __w->__parent_unsafe()->__is_black_;
+        -:  552:                        __w->__parent_unsafe()->__is_black_ = true;
+        -:  553:                        __w->__left_->__is_black_ = true;
+        -:  554:                        _VSTD::__tree_right_rotate(__w->__parent_unsafe());
+        -:  555:                        break;
+        -:  556:                    }
+        -:  557:                }
+        -:  558:            }
+        -:  559:        }
+        -:  560:    }
+        -:  561:}
+        -:  562:
+        -:  563:// node traits
+        -:  564:
+        -:  565:
+        -:  566:template <class _Tp>
+        -:  567:struct __is_tree_value_type_imp : false_type {};
+        -:  568:
+        -:  569:template <class _Key, class _Value>
+        -:  570:struct __is_tree_value_type_imp<__value_type<_Key, _Value> > : true_type {};
+        -:  571:
+        -:  572:template <class ..._Args>
+        -:  573:struct __is_tree_value_type : false_type {};
+        -:  574:
+        -:  575:template <class _One>
+        -:  576:struct __is_tree_value_type<_One> : __is_tree_value_type_imp<__remove_cvref_t<_One> > {};
+        -:  577:
+        -:  578:template <class _Tp>
+        -:  579:struct __tree_key_value_types {
+        -:  580:  typedef _Tp key_type;
+        -:  581:  typedef _Tp __node_value_type;
+        -:  582:  typedef _Tp __container_value_type;
+        -:  583:  static const bool __is_map = false;
+        -:  584:
+        -:  585:  _LIBCPP_INLINE_VISIBILITY
+        -:  586:  static key_type const& __get_key(_Tp const& __v) {
+        -:  587:    return __v;
+        -:  588:  }
+        -:  589:  _LIBCPP_INLINE_VISIBILITY
+        -:  590:  static __container_value_type const& __get_value(__node_value_type const& __v) {
+        -:  591:    return __v;
+        -:  592:  }
+        -:  593:  _LIBCPP_INLINE_VISIBILITY
+        -:  594:  static __container_value_type* __get_ptr(__node_value_type& __n) {
+        -:  595:    return _VSTD::addressof(__n);
+        -:  596:  }
+        -:  597:  _LIBCPP_INLINE_VISIBILITY
+        -:  598:  static __container_value_type&& __move(__node_value_type& __v) {
+        -:  599:    return _VSTD::move(__v);
+        -:  600:  }
+        -:  601:};
+        -:  602:
+        -:  603:template <class _Key, class _Tp>
+        -:  604:struct __tree_key_value_types<__value_type<_Key, _Tp> > {
+        -:  605:  typedef _Key                                         key_type;
+        -:  606:  typedef _Tp                                          mapped_type;
+        -:  607:  typedef __value_type<_Key, _Tp>                      __node_value_type;
+        -:  608:  typedef pair<const _Key, _Tp>                        __container_value_type;
+        -:  609:  typedef __container_value_type                       __map_value_type;
+        -:  610:  static const bool __is_map = true;
+        -:  611:
+        -:  612:  _LIBCPP_INLINE_VISIBILITY
+        -:  613:  static key_type const&
+        -:  614:  __get_key(__node_value_type const& __t) {
+        -:  615:    return __t.__get_value().first;
+        -:  616:  }
+        -:  617:
+        -:  618:  template <class _Up>
+        -:  619:  _LIBCPP_INLINE_VISIBILITY
+        -:  620:  static __enable_if_t<__is_same_uncvref<_Up, __container_value_type>::value, key_type const&>
+        -:  621:  __get_key(_Up& __t) {
+        -:  622:    return __t.first;
+        -:  623:  }
+        -:  624:
+        -:  625:  _LIBCPP_INLINE_VISIBILITY
+        -:  626:  static __container_value_type const&
+        -:  627:  __get_value(__node_value_type const& __t) {
+        -:  628:    return __t.__get_value();
+        -:  629:  }
+        -:  630:
+        -:  631:  template <class _Up>
+        -:  632:  _LIBCPP_INLINE_VISIBILITY
+        -:  633:  static __enable_if_t<__is_same_uncvref<_Up, __container_value_type>::value, __container_value_type const&>
+        -:  634:  __get_value(_Up& __t) {
+        -:  635:    return __t;
+        -:  636:  }
+        -:  637:
+        -:  638:  _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__122__tree_key_value_typesINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEE9__get_ptrB8ue170006ERS8_ called 0 returned 0% blocks executed 0%
+    #####:  639:  static __container_value_type* __get_ptr(__node_value_type& __n) {
+    #####:  640:    return _VSTD::addressof(__n.__get_value());
+        -:  641:  }
+        -:  642:
+        -:  643:  _LIBCPP_INLINE_VISIBILITY
+        -:  644:  static pair<key_type&&, mapped_type&&> __move(__node_value_type& __v) {
+        -:  645:    return __v.__move();
+        -:  646:  }
+        -:  647:};
+        -:  648:
+        -:  649:template <class _VoidPtr>
+        -:  650:struct __tree_node_base_types {
+        -:  651:  typedef _VoidPtr                                               __void_pointer;
+        -:  652:
+        -:  653:  typedef __tree_node_base<__void_pointer>                      __node_base_type;
+        -:  654:  typedef __rebind_pointer_t<_VoidPtr, __node_base_type>
+        -:  655:                                                             __node_base_pointer;
+        -:  656:
+        -:  657:  typedef __tree_end_node<__node_base_pointer>                  __end_node_type;
+        -:  658:  typedef __rebind_pointer_t<_VoidPtr, __end_node_type>
+        -:  659:                                                             __end_node_pointer;
+        -:  660:#if defined(_LIBCPP_ABI_TREE_REMOVE_NODE_POINTER_UB)
+        -:  661:  typedef __end_node_pointer __parent_pointer;
+        -:  662:#else
+        -:  663:  typedef __conditional_t< is_pointer<__end_node_pointer>::value, __end_node_pointer, __node_base_pointer>
+        -:  664:      __parent_pointer;
+        -:  665:#endif
+        -:  666:
+        -:  667:private:
+        -:  668:  static_assert((is_same<typename pointer_traits<_VoidPtr>::element_type, void>::value),
+        -:  669:                  "_VoidPtr does not point to unqualified void type");
+        -:  670:};
+        -:  671:
+        -:  672:template <class _Tp, class _AllocPtr, class _KVTypes = __tree_key_value_types<_Tp>,
+        -:  673:         bool = _KVTypes::__is_map>
+        -:  674:struct __tree_map_pointer_types {};
+        -:  675:
+        -:  676:template <class _Tp, class _AllocPtr, class _KVTypes>
+        -:  677:struct __tree_map_pointer_types<_Tp, _AllocPtr, _KVTypes, true> {
+        -:  678:  typedef typename _KVTypes::__map_value_type   _Mv;
+        -:  679:  typedef __rebind_pointer_t<_AllocPtr, _Mv>
+        -:  680:                                                       __map_value_type_pointer;
+        -:  681:  typedef __rebind_pointer_t<_AllocPtr, const _Mv>
+        -:  682:                                                 __const_map_value_type_pointer;
+        -:  683:};
+        -:  684:
+        -:  685:template <class _NodePtr, class _NodeT = typename pointer_traits<_NodePtr>::element_type>
+        -:  686:struct __tree_node_types;
+        -:  687:
+        -:  688:template <class _NodePtr, class _Tp, class _VoidPtr>
+        -:  689:struct __tree_node_types<_NodePtr, __tree_node<_Tp, _VoidPtr> >
+        -:  690:    : public __tree_node_base_types<_VoidPtr>,
+        -:  691:             __tree_key_value_types<_Tp>,
+        -:  692:             __tree_map_pointer_types<_Tp, _VoidPtr>
+        -:  693:{
+        -:  694:  typedef __tree_node_base_types<_VoidPtr> __base;
+        -:  695:  typedef __tree_key_value_types<_Tp>      __key_base;
+        -:  696:  typedef __tree_map_pointer_types<_Tp, _VoidPtr> __map_pointer_base;
+        -:  697:public:
+        -:  698:
+        -:  699:  typedef typename pointer_traits<_NodePtr>::element_type       __node_type;
+        -:  700:  typedef _NodePtr                                              __node_pointer;
+        -:  701:
+        -:  702:  typedef _Tp                                                 __node_value_type;
+        -:  703:  typedef __rebind_pointer_t<_VoidPtr, __node_value_type>
+        -:  704:                                                      __node_value_type_pointer;
+        -:  705:  typedef __rebind_pointer_t<_VoidPtr, const __node_value_type>
+        -:  706:                                                __const_node_value_type_pointer;
+        -:  707:#if defined(_LIBCPP_ABI_TREE_REMOVE_NODE_POINTER_UB)
+        -:  708:  typedef typename __base::__end_node_pointer __iter_pointer;
+        -:  709:#else
+        -:  710:  typedef __conditional_t< is_pointer<__node_pointer>::value, typename __base::__end_node_pointer, __node_pointer>
+        -:  711:      __iter_pointer;
+        -:  712:#endif
+        -:  713:private:
+        -:  714:    static_assert(!is_const<__node_type>::value,
+        -:  715:                "_NodePtr should never be a pointer to const");
+        -:  716:    static_assert((is_same<__rebind_pointer_t<_VoidPtr, __node_type>,
+        -:  717:                          _NodePtr>::value), "_VoidPtr does not rebind to _NodePtr.");
+        -:  718:};
+        -:  719:
+        -:  720:template <class _ValueTp, class _VoidPtr>
+        -:  721:struct __make_tree_node_types {
+        -:  722:  typedef __rebind_pointer_t<_VoidPtr, __tree_node<_ValueTp, _VoidPtr> >
+        -:  723:                                                                        _NodePtr;
+        -:  724:  typedef __tree_node_types<_NodePtr> type;
+        -:  725:};
+        -:  726:
+        -:  727:// node
+        -:  728:
+        -:  729:template <class _Pointer>
+        -:  730:class __tree_end_node
+        -:  731:{
+        -:  732:public:
+        -:  733:    typedef _Pointer pointer;
+        -:  734:    pointer __left_;
+        -:  735:
+        -:  736:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__115__tree_end_nodeIPNS_16__tree_node_baseIPvEEEC1B8ue170006Ev called 0 returned 0% blocks executed 0%
+function _ZNSt3__115__tree_end_nodeIPNS_16__tree_node_baseIPvEEEC2B8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####:  737:    __tree_end_node() _NOEXCEPT : __left_() {}
+        -:  738:};
+        -:  739:
+        -:  740:template <class _VoidPtr>
+        -:  741:class _LIBCPP_STANDALONE_DEBUG __tree_node_base
+        -:  742:    : public __tree_node_base_types<_VoidPtr>::__end_node_type
+        -:  743:{
+        -:  744:    typedef __tree_node_base_types<_VoidPtr> _NodeBaseTypes;
+        -:  745:
+        -:  746:public:
+        -:  747:    typedef typename _NodeBaseTypes::__node_base_pointer pointer;
+        -:  748:    typedef typename _NodeBaseTypes::__parent_pointer __parent_pointer;
+        -:  749:
+        -:  750:    pointer          __right_;
+        -:  751:    __parent_pointer __parent_;
+        -:  752:    bool __is_black_;
+        -:  753:
+        -:  754:    _LIBCPP_INLINE_VISIBILITY
+function _ZNKSt3__116__tree_node_baseIPvE15__parent_unsafeB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####:  755:    pointer __parent_unsafe() const { return static_cast<pointer>(__parent_);}
+        -:  756:
+        -:  757:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__116__tree_node_baseIPvE12__set_parentB8ue170006EPS2_ called 0 returned 0% blocks executed 0%
+    #####:  758:    void __set_parent(pointer __p) {
+    #####:  759:        __parent_ = static_cast<__parent_pointer>(__p);
+    #####:  760:    }
+        -:  761:
+        -:  762:private:
+        -:  763:  ~__tree_node_base() = delete;
+        -:  764:  __tree_node_base(__tree_node_base const&) = delete;
+        -:  765:  __tree_node_base& operator=(__tree_node_base const&) = delete;
+        -:  766:};
+        -:  767:
+        -:  768:template <class _Tp, class _VoidPtr>
+        -:  769:class _LIBCPP_STANDALONE_DEBUG __tree_node
+        -:  770:    : public __tree_node_base<_VoidPtr>
+        -:  771:{
+        -:  772:public:
+        -:  773:    typedef _Tp __node_value_type;
+        -:  774:
+        -:  775:    __node_value_type __value_;
+        -:  776:
+        -:  777:private:
+        -:  778:  ~__tree_node() = delete;
+        -:  779:  __tree_node(__tree_node const&) = delete;
+        -:  780:  __tree_node& operator=(__tree_node const&) = delete;
+        -:  781:};
+        -:  782:
+        -:  783:
+        -:  784:template <class _Allocator>
+        -:  785:class __tree_node_destructor
+        -:  786:{
+        -:  787:    typedef _Allocator                                      allocator_type;
+        -:  788:    typedef allocator_traits<allocator_type>                __alloc_traits;
+        -:  789:
+        -:  790:public:
+        -:  791:    typedef typename __alloc_traits::pointer                pointer;
+        -:  792:private:
+        -:  793:    typedef __tree_node_types<pointer> _NodeTypes;
+        -:  794:    allocator_type& __na_;
+        -:  795:
+        -:  796:
+        -:  797:public:
+        -:  798:    bool __value_constructed;
+        -:  799:
+        -:  800:
+        -:  801:    _LIBCPP_HIDE_FROM_ABI __tree_node_destructor(const __tree_node_destructor &) = default;
+        -:  802:    __tree_node_destructor& operator=(const __tree_node_destructor&) = delete;
+        -:  803:
+        -:  804:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__122__tree_node_destructorINS_9allocatorINS_11__tree_nodeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS1_IcEEEES8_EEPvEEEEEC1B8ue170006ERSC_b called 0 returned 0% blocks executed 0%
+function _ZNSt3__122__tree_node_destructorINS_9allocatorINS_11__tree_nodeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS1_IcEEEES8_EEPvEEEEEC2B8ue170006ERSC_b called 0 returned 0% blocks executed 0%
+    #####:  805:    explicit __tree_node_destructor(allocator_type& __na, bool __val = false) _NOEXCEPT
+    #####:  806:        : __na_(__na),
+    #####:  807:          __value_constructed(__val)
+    #####:  808:        {}
+        -:  809:
+        -:  810:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__122__tree_node_destructorINS_9allocatorINS_11__tree_nodeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS1_IcEEEES8_EEPvEEEEEclB8ue170006EPSB_ called 0 returned 0% blocks executed 0%
+    #####:  811:    void operator()(pointer __p) _NOEXCEPT
+        -:  812:    {
+    #####:  813:        if (__value_constructed)
+branch  0 never executed
+branch  1 never executed
+    #####:  814:            __alloc_traits::destroy(__na_, _NodeTypes::__get_ptr(__p->__value_));
+branch  0 never executed
+branch  1 never executed
+    #####:  815:        if (__p)
+branch  0 never executed
+branch  1 never executed
+    #####:  816:            __alloc_traits::deallocate(__na_, __p, 1);
+    #####:  817:    }
+        -:  818:
+        -:  819:    template <class> friend class __map_node_destructor;
+        -:  820:};
+        -:  821:
+        -:  822:#if _LIBCPP_STD_VER >= 17
+        -:  823:template <class _NodeType, class _Alloc>
+        -:  824:struct __generic_container_node_destructor;
+        -:  825:template <class _Tp, class _VoidPtr, class _Alloc>
+        -:  826:struct __generic_container_node_destructor<__tree_node<_Tp, _VoidPtr>, _Alloc>
+        -:  827:    : __tree_node_destructor<_Alloc>
+        -:  828:{
+        -:  829:    using __tree_node_destructor<_Alloc>::__tree_node_destructor;
+        -:  830:};
+        -:  831:#endif
+        -:  832:
+        -:  833:template <class _Tp, class _NodePtr, class _DiffType>
+        -:  834:class _LIBCPP_TEMPLATE_VIS __tree_iterator
+        -:  835:{
+        -:  836:    typedef __tree_node_types<_NodePtr>                     _NodeTypes;
+        -:  837:    typedef _NodePtr                                        __node_pointer;
+        -:  838:    typedef typename _NodeTypes::__node_base_pointer        __node_base_pointer;
+        -:  839:    typedef typename _NodeTypes::__end_node_pointer         __end_node_pointer;
+        -:  840:    typedef typename _NodeTypes::__iter_pointer             __iter_pointer;
+        -:  841:    typedef pointer_traits<__node_pointer> __pointer_traits;
+        -:  842:
+        -:  843:    __iter_pointer __ptr_;
+        -:  844:
+        -:  845:public:
+        -:  846:    typedef bidirectional_iterator_tag                     iterator_category;
+        -:  847:    typedef _Tp                                            value_type;
+        -:  848:    typedef _DiffType                                      difference_type;
+        -:  849:    typedef value_type&                                    reference;
+        -:  850:    typedef typename _NodeTypes::__node_value_type_pointer pointer;
+        -:  851:
+        -:  852:    _LIBCPP_INLINE_VISIBILITY __tree_iterator() _NOEXCEPT
+        -:  853:#if _LIBCPP_STD_VER >= 14
+        -:  854:    : __ptr_(nullptr)
+        -:  855:#endif
+        -:  856:    {}
+        -:  857:
+        -:  858:    _LIBCPP_INLINE_VISIBILITY reference operator*() const
+        -:  859:        {return __get_np()->__value_;}
+function _ZNKSt3__115__tree_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElEptB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####:  860:    _LIBCPP_INLINE_VISIBILITY pointer operator->() const
+    #####:  861:        {return pointer_traits<pointer>::pointer_to(__get_np()->__value_);}
+        -:  862:
+        -:  863:    _LIBCPP_INLINE_VISIBILITY
+        -:  864:    __tree_iterator& operator++() {
+        -:  865:      __ptr_ = static_cast<__iter_pointer>(
+        -:  866:          _VSTD::__tree_next_iter<__end_node_pointer>(static_cast<__node_base_pointer>(__ptr_)));
+        -:  867:      return *this;
+        -:  868:    }
+        -:  869:    _LIBCPP_INLINE_VISIBILITY
+        -:  870:    __tree_iterator operator++(int)
+        -:  871:        {__tree_iterator __t(*this); ++(*this); return __t;}
+        -:  872:
+        -:  873:    _LIBCPP_INLINE_VISIBILITY
+        -:  874:    __tree_iterator& operator--() {
+        -:  875:      __ptr_ = static_cast<__iter_pointer>(_VSTD::__tree_prev_iter<__node_base_pointer>(
+        -:  876:          static_cast<__end_node_pointer>(__ptr_)));
+        -:  877:      return *this;
+        -:  878:    }
+        -:  879:    _LIBCPP_INLINE_VISIBILITY
+        -:  880:    __tree_iterator operator--(int)
+        -:  881:        {__tree_iterator __t(*this); --(*this); return __t;}
+        -:  882:
+        -:  883:    friend _LIBCPP_INLINE_VISIBILITY
+        -:  884:        bool operator==(const __tree_iterator& __x, const __tree_iterator& __y)
+        -:  885:        {return __x.__ptr_ == __y.__ptr_;}
+        -:  886:    friend _LIBCPP_INLINE_VISIBILITY
+        -:  887:        bool operator!=(const __tree_iterator& __x, const __tree_iterator& __y)
+        -:  888:        {return !(__x == __y);}
+        -:  889:
+        -:  890:private:
+        -:  891:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__115__tree_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElEC1B8ue170006ESC_ called 0 returned 0% blocks executed 0%
+function _ZNSt3__115__tree_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElEC2B8ue170006ESC_ called 0 returned 0% blocks executed 0%
+    #####:  892:    explicit __tree_iterator(__node_pointer __p) _NOEXCEPT : __ptr_(__p) {}
+        -:  893:    _LIBCPP_INLINE_VISIBILITY
+        -:  894:    explicit __tree_iterator(__end_node_pointer __p) _NOEXCEPT : __ptr_(__p) {}
+        -:  895:    _LIBCPP_INLINE_VISIBILITY
+function _ZNKSt3__115__tree_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElE8__get_npB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####:  896:    __node_pointer __get_np() const { return static_cast<__node_pointer>(__ptr_); }
+        -:  897:    template <class, class, class> friend class __tree;
+        -:  898:    template <class, class, class> friend class _LIBCPP_TEMPLATE_VIS __tree_const_iterator;
+        -:  899:    template <class> friend class _LIBCPP_TEMPLATE_VIS __map_iterator;
+        -:  900:    template <class, class, class, class> friend class _LIBCPP_TEMPLATE_VIS map;
+        -:  901:    template <class, class, class, class> friend class _LIBCPP_TEMPLATE_VIS multimap;
+        -:  902:    template <class, class, class> friend class _LIBCPP_TEMPLATE_VIS set;
+        -:  903:    template <class, class, class> friend class _LIBCPP_TEMPLATE_VIS multiset;
+        -:  904:};
+        -:  905:
+        -:  906:template <class _Tp, class _NodePtr, class _DiffType>
+        -:  907:class _LIBCPP_TEMPLATE_VIS __tree_const_iterator
+        -:  908:{
+        -:  909:    typedef __tree_node_types<_NodePtr>                     _NodeTypes;
+        -:  910:    typedef typename _NodeTypes::__node_pointer             __node_pointer;
+        -:  911:    typedef typename _NodeTypes::__node_base_pointer        __node_base_pointer;
+        -:  912:    typedef typename _NodeTypes::__end_node_pointer         __end_node_pointer;
+        -:  913:    typedef typename _NodeTypes::__iter_pointer             __iter_pointer;
+        -:  914:    typedef pointer_traits<__node_pointer> __pointer_traits;
+        -:  915:
+        -:  916:    __iter_pointer __ptr_;
+        -:  917:
+        -:  918:public:
+        -:  919:    typedef bidirectional_iterator_tag                           iterator_category;
+        -:  920:    typedef _Tp                                                  value_type;
+        -:  921:    typedef _DiffType                                            difference_type;
+        -:  922:    typedef const value_type&                                    reference;
+        -:  923:    typedef typename _NodeTypes::__const_node_value_type_pointer pointer;
+        -:  924:
+        -:  925:    _LIBCPP_INLINE_VISIBILITY __tree_const_iterator() _NOEXCEPT
+        -:  926:#if _LIBCPP_STD_VER >= 14
+        -:  927:    : __ptr_(nullptr)
+        -:  928:#endif
+        -:  929:    {}
+        -:  930:
+        -:  931:private:
+        -:  932:    typedef __tree_iterator<value_type, __node_pointer, difference_type>
+        -:  933:                                                           __non_const_iterator;
+        -:  934:public:
+        -:  935:    _LIBCPP_INLINE_VISIBILITY
+        -:  936:    __tree_const_iterator(__non_const_iterator __p) _NOEXCEPT
+        -:  937:        : __ptr_(__p.__ptr_) {}
+        -:  938:
+function _ZNKSt3__121__tree_const_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElEdeB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####:  939:    _LIBCPP_INLINE_VISIBILITY reference operator*() const
+    #####:  940:        {return __get_np()->__value_;}
+function _ZNKSt3__121__tree_const_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElEptB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####:  941:    _LIBCPP_INLINE_VISIBILITY pointer operator->() const
+    #####:  942:        {return pointer_traits<pointer>::pointer_to(__get_np()->__value_);}
+        -:  943:
+        -:  944:    _LIBCPP_INLINE_VISIBILITY
+        -:  945:    __tree_const_iterator& operator++() {
+        -:  946:      __ptr_ = static_cast<__iter_pointer>(
+        -:  947:          _VSTD::__tree_next_iter<__end_node_pointer>(static_cast<__node_base_pointer>(__ptr_)));
+        -:  948:      return *this;
+        -:  949:    }
+        -:  950:
+        -:  951:    _LIBCPP_INLINE_VISIBILITY
+        -:  952:    __tree_const_iterator operator++(int)
+        -:  953:        {__tree_const_iterator __t(*this); ++(*this); return __t;}
+        -:  954:
+        -:  955:    _LIBCPP_INLINE_VISIBILITY
+        -:  956:    __tree_const_iterator& operator--() {
+        -:  957:      __ptr_ = static_cast<__iter_pointer>(_VSTD::__tree_prev_iter<__node_base_pointer>(
+        -:  958:          static_cast<__end_node_pointer>(__ptr_)));
+        -:  959:      return *this;
+        -:  960:    }
+        -:  961:
+        -:  962:    _LIBCPP_INLINE_VISIBILITY
+        -:  963:    __tree_const_iterator operator--(int)
+        -:  964:        {__tree_const_iterator __t(*this); --(*this); return __t;}
+        -:  965:
+        -:  966:    friend _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__1eqB8ue170006ERKNS_21__tree_const_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElEESF_ called 0 returned 0% blocks executed 0%
+    #####:  967:        bool operator==(const __tree_const_iterator& __x, const __tree_const_iterator& __y)
+    #####:  968:        {return __x.__ptr_ == __y.__ptr_;}
+        -:  969:    friend _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__1neB8ue170006ERKNS_21__tree_const_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElEESF_ called 0 returned 0% blocks executed 0%
+    #####:  970:        bool operator!=(const __tree_const_iterator& __x, const __tree_const_iterator& __y)
+    #####:  971:        {return !(__x == __y);}
+        -:  972:
+        -:  973:private:
+        -:  974:    _LIBCPP_INLINE_VISIBILITY
+        -:  975:    explicit __tree_const_iterator(__node_pointer __p) _NOEXCEPT
+        -:  976:        : __ptr_(__p) {}
+        -:  977:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__121__tree_const_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElEC1B8ue170006EPNS_15__tree_end_nodeIPNS_16__tree_node_baseISA_EEEE called 0 returned 0% blocks executed 0%
+function _ZNSt3__121__tree_const_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElEC2B8ue170006EPNS_15__tree_end_nodeIPNS_16__tree_node_baseISA_EEEE called 0 returned 0% blocks executed 0%
+    #####:  978:    explicit __tree_const_iterator(__end_node_pointer __p) _NOEXCEPT
+    #####:  979:        : __ptr_(__p) {}
+        -:  980:    _LIBCPP_INLINE_VISIBILITY
+function _ZNKSt3__121__tree_const_iteratorINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EEPNS_11__tree_nodeIS8_PvEElE8__get_npB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####:  981:    __node_pointer __get_np() const { return static_cast<__node_pointer>(__ptr_); }
+        -:  982:
+        -:  983:    template <class, class, class> friend class __tree;
+        -:  984:    template <class, class, class, class> friend class _LIBCPP_TEMPLATE_VIS map;
+        -:  985:    template <class, class, class, class> friend class _LIBCPP_TEMPLATE_VIS multimap;
+        -:  986:    template <class, class, class> friend class _LIBCPP_TEMPLATE_VIS set;
+        -:  987:    template <class, class, class> friend class _LIBCPP_TEMPLATE_VIS multiset;
+        -:  988:    template <class> friend class _LIBCPP_TEMPLATE_VIS __map_const_iterator;
+        -:  989:
+        -:  990:};
+        -:  991:
+        -:  992:template<class _Tp, class _Compare>
+        -:  993:#ifndef _LIBCPP_CXX03_LANG
+        -:  994:    _LIBCPP_DIAGNOSE_WARNING(!__invokable<_Compare const&, _Tp const&, _Tp const&>::value,
+        -:  995:        "the specified comparator type does not provide a viable const call operator")
+        -:  996:#endif
+        -:  997:int __diagnose_non_const_comparator();
+        -:  998:
+        -:  999:template <class _Tp, class _Compare, class _Allocator>
+        -: 1000:class __tree
+        -: 1001:{
+        -: 1002:public:
+        -: 1003:    typedef _Tp                                      value_type;
+        -: 1004:    typedef _Compare                                 value_compare;
+        -: 1005:    typedef _Allocator                               allocator_type;
+        -: 1006:
+        -: 1007:private:
+        -: 1008:    typedef allocator_traits<allocator_type>         __alloc_traits;
+        -: 1009:    typedef typename __make_tree_node_types<value_type,
+        -: 1010:        typename __alloc_traits::void_pointer>::type
+        -: 1011:                                                    _NodeTypes;
+        -: 1012:    typedef typename _NodeTypes::key_type           key_type;
+        -: 1013:public:
+        -: 1014:    typedef typename _NodeTypes::__node_value_type      __node_value_type;
+        -: 1015:    typedef typename _NodeTypes::__container_value_type __container_value_type;
+        -: 1016:
+        -: 1017:    typedef typename __alloc_traits::pointer         pointer;
+        -: 1018:    typedef typename __alloc_traits::const_pointer   const_pointer;
+        -: 1019:    typedef typename __alloc_traits::size_type       size_type;
+        -: 1020:    typedef typename __alloc_traits::difference_type difference_type;
+        -: 1021:
+        -: 1022:public:
+        -: 1023:    typedef typename _NodeTypes::__void_pointer        __void_pointer;
+        -: 1024:
+        -: 1025:    typedef typename _NodeTypes::__node_type           __node;
+        -: 1026:    typedef typename _NodeTypes::__node_pointer        __node_pointer;
+        -: 1027:
+        -: 1028:    typedef typename _NodeTypes::__node_base_type      __node_base;
+        -: 1029:    typedef typename _NodeTypes::__node_base_pointer   __node_base_pointer;
+        -: 1030:
+        -: 1031:    typedef typename _NodeTypes::__end_node_type       __end_node_t;
+        -: 1032:    typedef typename _NodeTypes::__end_node_pointer    __end_node_ptr;
+        -: 1033:
+        -: 1034:    typedef typename _NodeTypes::__parent_pointer      __parent_pointer;
+        -: 1035:    typedef typename _NodeTypes::__iter_pointer        __iter_pointer;
+        -: 1036:
+        -: 1037:    typedef __rebind_alloc<__alloc_traits, __node> __node_allocator;
+        -: 1038:    typedef allocator_traits<__node_allocator>         __node_traits;
+        -: 1039:
+        -: 1040:private:
+        -: 1041:    // check for sane allocator pointer rebinding semantics. Rebinding the
+        -: 1042:    // allocator for a new pointer type should be exactly the same as rebinding
+        -: 1043:    // the pointer using 'pointer_traits'.
+        -: 1044:    static_assert((is_same<__node_pointer, typename __node_traits::pointer>::value),
+        -: 1045:                  "Allocator does not rebind pointers in a sane manner.");
+        -: 1046:    typedef __rebind_alloc<__node_traits, __node_base> __node_base_allocator;
+        -: 1047:    typedef allocator_traits<__node_base_allocator> __node_base_traits;
+        -: 1048:    static_assert((is_same<__node_base_pointer, typename __node_base_traits::pointer>::value),
+        -: 1049:                 "Allocator does not rebind pointers in a sane manner.");
+        -: 1050:
+        -: 1051:private:
+        -: 1052:    __iter_pointer                                     __begin_node_;
+        -: 1053:    __compressed_pair<__end_node_t, __node_allocator>  __pair1_;
+        -: 1054:    __compressed_pair<size_type, value_compare>        __pair3_;
+        -: 1055:
+        -: 1056:public:
+        -: 1057:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE10__end_nodeB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1058:    __iter_pointer __end_node() _NOEXCEPT
+        -: 1059:    {
+    #####: 1060:        return static_cast<__iter_pointer>(
+    #####: 1061:                pointer_traits<__end_node_ptr>::pointer_to(__pair1_.first())
+        -: 1062:        );
+        -: 1063:    }
+        -: 1064:    _LIBCPP_INLINE_VISIBILITY
+function _ZNKSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE10__end_nodeB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1065:    __iter_pointer __end_node() const _NOEXCEPT
+        -: 1066:    {
+    #####: 1067:        return static_cast<__iter_pointer>(
+    #####: 1068:            pointer_traits<__end_node_ptr>::pointer_to(
+    #####: 1069:                const_cast<__end_node_t&>(__pair1_.first())
+        -: 1070:            )
+        -: 1071:        );
+        -: 1072:    }
+        -: 1073:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE12__node_allocB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1074:          __node_allocator& __node_alloc() _NOEXCEPT {return __pair1_.second();}
+        -: 1075:private:
+        -: 1076:    _LIBCPP_INLINE_VISIBILITY
+        -: 1077:    const __node_allocator& __node_alloc() const _NOEXCEPT
+        -: 1078:        {return __pair1_.second();}
+        -: 1079:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE12__begin_nodeB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1080:          __iter_pointer& __begin_node() _NOEXCEPT {return __begin_node_;}
+        -: 1081:    _LIBCPP_INLINE_VISIBILITY
+        -: 1082:    const __iter_pointer& __begin_node() const _NOEXCEPT {return __begin_node_;}
+        -: 1083:public:
+        -: 1084:    _LIBCPP_INLINE_VISIBILITY
+        -: 1085:    allocator_type __alloc() const _NOEXCEPT
+        -: 1086:        {return allocator_type(__node_alloc());}
+        -: 1087:private:
+        -: 1088:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE4sizeB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1089:          size_type& size() _NOEXCEPT {return __pair3_.first();}
+        -: 1090:public:
+        -: 1091:    _LIBCPP_INLINE_VISIBILITY
+        -: 1092:    const size_type& size() const _NOEXCEPT {return __pair3_.first();}
+        -: 1093:    _LIBCPP_INLINE_VISIBILITY
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE10value_compB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1094:          value_compare& value_comp() _NOEXCEPT {return __pair3_.second();}
+        -: 1095:    _LIBCPP_INLINE_VISIBILITY
+function _ZNKSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE10value_compB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1096:    const value_compare& value_comp() const _NOEXCEPT
+    #####: 1097:        {return __pair3_.second();}
+        -: 1098:public:
+        -: 1099:
+        -: 1100:    _LIBCPP_INLINE_VISIBILITY
+function _ZNKSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE6__rootB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1101:    __node_pointer __root() const _NOEXCEPT
+    #####: 1102:        {return static_cast<__node_pointer>(__end_node()->__left_);}
+        -: 1103:
+function _ZNKSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE10__root_ptrB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1104:    _LIBCPP_HIDE_FROM_ABI __node_base_pointer* __root_ptr() const _NOEXCEPT {
+    #####: 1105:        return _VSTD::addressof(__end_node()->__left_);
+        -: 1106:    }
+        -: 1107:
+        -: 1108:    typedef __tree_iterator<value_type, __node_pointer, difference_type>             iterator;
+        -: 1109:    typedef __tree_const_iterator<value_type, __node_pointer, difference_type> const_iterator;
+        -: 1110:
+    #####: 1111:    _LIBCPP_HIDE_FROM_ABI explicit __tree(const value_compare& __comp)
+branch  0 never executed
+branch  1 never executed
+        -: 1112:        _NOEXCEPT_(
+        -: 1113:            is_nothrow_default_constructible<__node_allocator>::value &&
+        -: 1114:            is_nothrow_copy_constructible<value_compare>::value);
+        -: 1115:    _LIBCPP_HIDE_FROM_ABI explicit __tree(const allocator_type& __a);
+        -: 1116:    _LIBCPP_HIDE_FROM_ABI __tree(const value_compare& __comp, const allocator_type& __a);
+        -: 1117:    _LIBCPP_HIDE_FROM_ABI __tree(const __tree& __t);
+        -: 1118:    _LIBCPP_HIDE_FROM_ABI __tree& operator=(const __tree& __t);
+        -: 1119:    template <class _ForwardIterator>
+        -: 1120:    _LIBCPP_HIDE_FROM_ABI void __assign_unique(_ForwardIterator __first, _ForwardIterator __last);
+        -: 1121:    template <class _InputIterator>
+        -: 1122:    _LIBCPP_HIDE_FROM_ABI void __assign_multi(_InputIterator __first, _InputIterator __last);
+        -: 1123:    _LIBCPP_HIDE_FROM_ABI __tree(__tree&& __t)
+        -: 1124:        _NOEXCEPT_(
+        -: 1125:            is_nothrow_move_constructible<__node_allocator>::value &&
+        -: 1126:            is_nothrow_move_constructible<value_compare>::value);
+        -: 1127:    _LIBCPP_HIDE_FROM_ABI __tree(__tree&& __t, const allocator_type& __a);
+        -: 1128:    _LIBCPP_HIDE_FROM_ABI __tree& operator=(__tree&& __t)
+        -: 1129:        _NOEXCEPT_(
+        -: 1130:            __node_traits::propagate_on_container_move_assignment::value &&
+        -: 1131:            is_nothrow_move_assignable<value_compare>::value &&
+        -: 1132:            is_nothrow_move_assignable<__node_allocator>::value);
+        -: 1133:    _LIBCPP_HIDE_FROM_ABI ~__tree();
+        -: 1134:
+        -: 1135:    _LIBCPP_INLINE_VISIBILITY
+        -: 1136:          iterator begin()  _NOEXCEPT {return       iterator(__begin_node());}
+        -: 1137:    _LIBCPP_INLINE_VISIBILITY
+        -: 1138:    const_iterator begin() const _NOEXCEPT {return const_iterator(__begin_node());}
+        -: 1139:    _LIBCPP_INLINE_VISIBILITY
+        -: 1140:          iterator end() _NOEXCEPT {return       iterator(__end_node());}
+        -: 1141:    _LIBCPP_INLINE_VISIBILITY
+function _ZNKSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE3endB8ue170006Ev called 0 returned 0% blocks executed 0%
+    #####: 1142:    const_iterator end() const _NOEXCEPT {return const_iterator(__end_node());}
+        -: 1143:
+        -: 1144:    _LIBCPP_INLINE_VISIBILITY
+        -: 1145:    size_type max_size() const _NOEXCEPT
+        -: 1146:        {return _VSTD::min<size_type>(
+        -: 1147:                __node_traits::max_size(__node_alloc()),
+        -: 1148:                numeric_limits<difference_type >::max());}
+        -: 1149:
+        -: 1150:    _LIBCPP_HIDE_FROM_ABI void clear() _NOEXCEPT;
+        -: 1151:
+        -: 1152:    _LIBCPP_HIDE_FROM_ABI void swap(__tree& __t)
+        -: 1153:#if _LIBCPP_STD_VER <= 11
+        -: 1154:        _NOEXCEPT_(
+        -: 1155:            __is_nothrow_swappable<value_compare>::value
+        -: 1156:            && (!__node_traits::propagate_on_container_swap::value ||
+        -: 1157:                 __is_nothrow_swappable<__node_allocator>::value)
+        -: 1158:            );
+        -: 1159:#else
+        -: 1160:        _NOEXCEPT_(__is_nothrow_swappable<value_compare>::value);
+        -: 1161:#endif
+        -: 1162:
+        -: 1163:    template <class _Key, class ..._Args>
+        -: 1164:    _LIBCPP_HIDE_FROM_ABI pair<iterator, bool>
+        -: 1165:    __emplace_unique_key_args(_Key const&, _Args&&... __args);
+        -: 1166:    template <class _Key, class ..._Args>
+        -: 1167:    _LIBCPP_HIDE_FROM_ABI pair<iterator, bool>
+        -: 1168:    __emplace_hint_unique_key_args(const_iterator, _Key const&, _Args&&...);
+        -: 1169:
+        -: 1170:    template <class... _Args>
+        -: 1171:    _LIBCPP_HIDE_FROM_ABI pair<iterator, bool> __emplace_unique_impl(_Args&&... __args);
+        -: 1172:
+        -: 1173:    template <class... _Args>
+        -: 1174:    _LIBCPP_HIDE_FROM_ABI iterator __emplace_hint_unique_impl(const_iterator __p, _Args&&... __args);
+        -: 1175:
+        -: 1176:    template <class... _Args>
+        -: 1177:    _LIBCPP_HIDE_FROM_ABI iterator __emplace_multi(_Args&&... __args);
+        -: 1178:
+        -: 1179:    template <class... _Args>
+        -: 1180:    _LIBCPP_HIDE_FROM_ABI iterator __emplace_hint_multi(const_iterator __p, _Args&&... __args);
+        -: 1181:
+        -: 1182:    template <class _Pp>
+        -: 1183:    _LIBCPP_INLINE_VISIBILITY
+        -: 1184:    pair<iterator, bool> __emplace_unique(_Pp&& __x) {
+        -: 1185:        return __emplace_unique_extract_key(_VSTD::forward<_Pp>(__x),
+        -: 1186:                                            __can_extract_key<_Pp, key_type>());
+        -: 1187:    }
+        -: 1188:
+        -: 1189:    template <class _First, class _Second>
+        -: 1190:    _LIBCPP_INLINE_VISIBILITY
+        -: 1191:    __enable_if_t<__can_extract_map_key<_First, key_type, __container_value_type>::value, pair<iterator, bool> >
+        -: 1192:    __emplace_unique(_First&& __f, _Second&& __s) {
+        -: 1193:        return __emplace_unique_key_args(__f, _VSTD::forward<_First>(__f),
+        -: 1194:                                              _VSTD::forward<_Second>(__s));
+        -: 1195:    }
+        -: 1196:
+        -: 1197:    template <class... _Args>
+        -: 1198:    _LIBCPP_INLINE_VISIBILITY
+        -: 1199:    pair<iterator, bool> __emplace_unique(_Args&&... __args) {
+        -: 1200:        return __emplace_unique_impl(_VSTD::forward<_Args>(__args)...);
+        -: 1201:    }
+        -: 1202:
+        -: 1203:    template <class _Pp>
+        -: 1204:    _LIBCPP_INLINE_VISIBILITY
+        -: 1205:    pair<iterator, bool>
+        -: 1206:    __emplace_unique_extract_key(_Pp&& __x, __extract_key_fail_tag) {
+        -: 1207:      return __emplace_unique_impl(_VSTD::forward<_Pp>(__x));
+        -: 1208:    }
+        -: 1209:
+        -: 1210:    template <class _Pp>
+        -: 1211:    _LIBCPP_INLINE_VISIBILITY
+        -: 1212:    pair<iterator, bool>
+        -: 1213:    __emplace_unique_extract_key(_Pp&& __x, __extract_key_self_tag) {
+        -: 1214:      return __emplace_unique_key_args(__x, _VSTD::forward<_Pp>(__x));
+        -: 1215:    }
+        -: 1216:
+        -: 1217:    template <class _Pp>
+        -: 1218:    _LIBCPP_INLINE_VISIBILITY
+        -: 1219:    pair<iterator, bool>
+        -: 1220:    __emplace_unique_extract_key(_Pp&& __x, __extract_key_first_tag) {
+        -: 1221:      return __emplace_unique_key_args(__x.first, _VSTD::forward<_Pp>(__x));
+        -: 1222:    }
+        -: 1223:
+        -: 1224:    template <class _Pp>
+        -: 1225:    _LIBCPP_INLINE_VISIBILITY
+        -: 1226:    iterator __emplace_hint_unique(const_iterator __p, _Pp&& __x) {
+        -: 1227:        return __emplace_hint_unique_extract_key(__p, _VSTD::forward<_Pp>(__x),
+        -: 1228:                                            __can_extract_key<_Pp, key_type>());
+        -: 1229:    }
+        -: 1230:
+        -: 1231:    template <class _First, class _Second>
+        -: 1232:    _LIBCPP_INLINE_VISIBILITY
+        -: 1233:    __enable_if_t<__can_extract_map_key<_First, key_type, __container_value_type>::value, iterator>
+        -: 1234:    __emplace_hint_unique(const_iterator __p, _First&& __f, _Second&& __s) {
+        -: 1235:        return __emplace_hint_unique_key_args(__p, __f,
+        -: 1236:                                              _VSTD::forward<_First>(__f),
+        -: 1237:                                              _VSTD::forward<_Second>(__s)).first;
+        -: 1238:    }
+        -: 1239:
+        -: 1240:    template <class... _Args>
+        -: 1241:    _LIBCPP_INLINE_VISIBILITY
+        -: 1242:    iterator __emplace_hint_unique(const_iterator __p, _Args&&... __args) {
+        -: 1243:        return __emplace_hint_unique_impl(__p, _VSTD::forward<_Args>(__args)...);
+        -: 1244:    }
+        -: 1245:
+        -: 1246:    template <class _Pp>
+        -: 1247:    _LIBCPP_INLINE_VISIBILITY
+        -: 1248:    iterator
+        -: 1249:    __emplace_hint_unique_extract_key(const_iterator __p, _Pp&& __x, __extract_key_fail_tag) {
+        -: 1250:      return __emplace_hint_unique_impl(__p, _VSTD::forward<_Pp>(__x));
+        -: 1251:    }
+        -: 1252:
+        -: 1253:    template <class _Pp>
+        -: 1254:    _LIBCPP_INLINE_VISIBILITY
+        -: 1255:    iterator
+        -: 1256:    __emplace_hint_unique_extract_key(const_iterator __p, _Pp&& __x, __extract_key_self_tag) {
+        -: 1257:      return __emplace_hint_unique_key_args(__p, __x, _VSTD::forward<_Pp>(__x)).first;
+        -: 1258:    }
+        -: 1259:
+        -: 1260:    template <class _Pp>
+        -: 1261:    _LIBCPP_INLINE_VISIBILITY
+        -: 1262:    iterator
+        -: 1263:    __emplace_hint_unique_extract_key(const_iterator __p, _Pp&& __x, __extract_key_first_tag) {
+        -: 1264:      return __emplace_hint_unique_key_args(__p, __x.first, _VSTD::forward<_Pp>(__x)).first;
+        -: 1265:    }
+        -: 1266:
+        -: 1267:    _LIBCPP_INLINE_VISIBILITY
+        -: 1268:    pair<iterator, bool> __insert_unique(const __container_value_type& __v) {
+        -: 1269:        return __emplace_unique_key_args(_NodeTypes::__get_key(__v), __v);
+        -: 1270:    }
+        -: 1271:
+        -: 1272:    _LIBCPP_INLINE_VISIBILITY
+        -: 1273:    iterator __insert_unique(const_iterator __p, const __container_value_type& __v) {
+        -: 1274:        return __emplace_hint_unique_key_args(__p, _NodeTypes::__get_key(__v), __v).first;
+        -: 1275:    }
+        -: 1276:
+        -: 1277:    _LIBCPP_INLINE_VISIBILITY
+        -: 1278:    pair<iterator, bool> __insert_unique(__container_value_type&& __v) {
+        -: 1279:        return __emplace_unique_key_args(_NodeTypes::__get_key(__v), _VSTD::move(__v));
+        -: 1280:    }
+        -: 1281:
+        -: 1282:    _LIBCPP_INLINE_VISIBILITY
+        -: 1283:    iterator __insert_unique(const_iterator __p, __container_value_type&& __v) {
+        -: 1284:        return __emplace_hint_unique_key_args(__p, _NodeTypes::__get_key(__v), _VSTD::move(__v)).first;
+        -: 1285:    }
+        -: 1286:
+        -: 1287:    template <class _Vp,
+        -: 1288:              class = __enable_if_t<!is_same<__remove_const_ref_t<_Vp>, __container_value_type>::value> >
+        -: 1289:    _LIBCPP_INLINE_VISIBILITY
+        -: 1290:    pair<iterator, bool> __insert_unique(_Vp&& __v) {
+        -: 1291:        return __emplace_unique(_VSTD::forward<_Vp>(__v));
+        -: 1292:    }
+        -: 1293:
+        -: 1294:    template <class _Vp,
+        -: 1295:              class = __enable_if_t<!is_same<__remove_const_ref_t<_Vp>, __container_value_type>::value> >
+        -: 1296:    _LIBCPP_INLINE_VISIBILITY
+        -: 1297:    iterator __insert_unique(const_iterator __p, _Vp&& __v) {
+        -: 1298:        return __emplace_hint_unique(__p, _VSTD::forward<_Vp>(__v));
+        -: 1299:    }
+        -: 1300:
+        -: 1301:    _LIBCPP_INLINE_VISIBILITY
+        -: 1302:    iterator __insert_multi(__container_value_type&& __v) {
+        -: 1303:        return __emplace_multi(_VSTD::move(__v));
+        -: 1304:    }
+        -: 1305:
+        -: 1306:    _LIBCPP_INLINE_VISIBILITY
+        -: 1307:    iterator __insert_multi(const_iterator __p, __container_value_type&& __v) {
+        -: 1308:        return __emplace_hint_multi(__p, _VSTD::move(__v));
+        -: 1309:    }
+        -: 1310:
+        -: 1311:    template <class _Vp>
+        -: 1312:    _LIBCPP_INLINE_VISIBILITY
+        -: 1313:    iterator __insert_multi(_Vp&& __v) {
+        -: 1314:        return __emplace_multi(_VSTD::forward<_Vp>(__v));
+        -: 1315:    }
+        -: 1316:
+        -: 1317:    template <class _Vp>
+        -: 1318:    _LIBCPP_INLINE_VISIBILITY
+        -: 1319:    iterator __insert_multi(const_iterator __p, _Vp&& __v) {
+        -: 1320:        return __emplace_hint_multi(__p, _VSTD::forward<_Vp>(__v));
+        -: 1321:    }
+        -: 1322:
+        -: 1323:    _LIBCPP_INLINE_VISIBILITY
+        -: 1324:    pair<iterator, bool> __node_assign_unique(const __container_value_type& __v, __node_pointer __dest);
+        -: 1325:
+        -: 1326:    _LIBCPP_INLINE_VISIBILITY
+        -: 1327:    iterator __node_insert_multi(__node_pointer __nd);
+        -: 1328:    _LIBCPP_INLINE_VISIBILITY
+        -: 1329:    iterator __node_insert_multi(const_iterator __p, __node_pointer __nd);
+        -: 1330:
+        -: 1331:
+        -: 1332:    _LIBCPP_INLINE_VISIBILITY iterator
+        -: 1333:    __remove_node_pointer(__node_pointer) _NOEXCEPT;
+        -: 1334:
+        -: 1335:#if _LIBCPP_STD_VER >= 17
+        -: 1336:    template <class _NodeHandle, class _InsertReturnType>
+        -: 1337:    _LIBCPP_INLINE_VISIBILITY
+        -: 1338:    _InsertReturnType __node_handle_insert_unique(_NodeHandle&&);
+        -: 1339:    template <class _NodeHandle>
+        -: 1340:    _LIBCPP_INLINE_VISIBILITY
+        -: 1341:    iterator __node_handle_insert_unique(const_iterator, _NodeHandle&&);
+        -: 1342:    template <class _Tree>
+        -: 1343:    _LIBCPP_INLINE_VISIBILITY
+        -: 1344:    void __node_handle_merge_unique(_Tree& __source);
+        -: 1345:
+        -: 1346:    template <class _NodeHandle>
+        -: 1347:    _LIBCPP_INLINE_VISIBILITY
+        -: 1348:    iterator __node_handle_insert_multi(_NodeHandle&&);
+        -: 1349:    template <class _NodeHandle>
+        -: 1350:    _LIBCPP_INLINE_VISIBILITY
+        -: 1351:    iterator __node_handle_insert_multi(const_iterator, _NodeHandle&&);
+        -: 1352:    template <class _Tree>
+        -: 1353:    _LIBCPP_INLINE_VISIBILITY
+        -: 1354:    void __node_handle_merge_multi(_Tree& __source);
+        -: 1355:
+        -: 1356:
+        -: 1357:    template <class _NodeHandle>
+        -: 1358:    _LIBCPP_INLINE_VISIBILITY
+        -: 1359:    _NodeHandle __node_handle_extract(key_type const&);
+        -: 1360:    template <class _NodeHandle>
+        -: 1361:    _LIBCPP_INLINE_VISIBILITY
+        -: 1362:    _NodeHandle __node_handle_extract(const_iterator);
+        -: 1363:#endif
+        -: 1364:
+        -: 1365:    _LIBCPP_HIDE_FROM_ABI iterator erase(const_iterator __p);
+        -: 1366:    _LIBCPP_HIDE_FROM_ABI iterator erase(const_iterator __f, const_iterator __l);
+        -: 1367:    template <class _Key>
+        -: 1368:    _LIBCPP_HIDE_FROM_ABI size_type __erase_unique(const _Key& __k);
+        -: 1369:    template <class _Key>
+        -: 1370:    _LIBCPP_HIDE_FROM_ABI size_type __erase_multi(const _Key& __k);
+        -: 1371:
+        -: 1372:    _LIBCPP_HIDE_FROM_ABI void __insert_node_at(__parent_pointer     __parent,
+        -: 1373:                          __node_base_pointer& __child,
+        -: 1374:                          __node_base_pointer __new_node) _NOEXCEPT;
+        -: 1375:
+        -: 1376:    template <class _Key>
+        -: 1377:    _LIBCPP_HIDE_FROM_ABI iterator find(const _Key& __v);
+        -: 1378:    template <class _Key>
+        -: 1379:    _LIBCPP_HIDE_FROM_ABI const_iterator find(const _Key& __v) const;
+        -: 1380:
+        -: 1381:    template <class _Key>
+        -: 1382:    _LIBCPP_HIDE_FROM_ABI size_type __count_unique(const _Key& __k) const;
+        -: 1383:    template <class _Key>
+        -: 1384:    _LIBCPP_HIDE_FROM_ABI size_type __count_multi(const _Key& __k) const;
+        -: 1385:
+        -: 1386:    template <class _Key>
+        -: 1387:        _LIBCPP_INLINE_VISIBILITY
+        -: 1388:        iterator lower_bound(const _Key& __v)
+        -: 1389:            {return __lower_bound(__v, __root(), __end_node());}
+        -: 1390:    template <class _Key>
+        -: 1391:    _LIBCPP_HIDE_FROM_ABI iterator __lower_bound(const _Key& __v,
+        -: 1392:                               __node_pointer __root,
+        -: 1393:                               __iter_pointer __result);
+        -: 1394:    template <class _Key>
+        -: 1395:        _LIBCPP_INLINE_VISIBILITY
+        -: 1396:        const_iterator lower_bound(const _Key& __v) const
+        -: 1397:            {return __lower_bound(__v, __root(), __end_node());}
+        -: 1398:    template <class _Key>
+        -: 1399:    _LIBCPP_HIDE_FROM_ABI const_iterator __lower_bound(const _Key& __v,
+        -: 1400:                                     __node_pointer __root,
+        -: 1401:                                     __iter_pointer __result) const;
+        -: 1402:    template <class _Key>
+        -: 1403:        _LIBCPP_INLINE_VISIBILITY
+        -: 1404:        iterator upper_bound(const _Key& __v)
+        -: 1405:            {return __upper_bound(__v, __root(), __end_node());}
+        -: 1406:    template <class _Key>
+        -: 1407:    _LIBCPP_HIDE_FROM_ABI iterator __upper_bound(const _Key& __v,
+        -: 1408:                               __node_pointer __root,
+        -: 1409:                               __iter_pointer __result);
+        -: 1410:    template <class _Key>
+        -: 1411:        _LIBCPP_INLINE_VISIBILITY
+        -: 1412:        const_iterator upper_bound(const _Key& __v) const
+        -: 1413:            {return __upper_bound(__v, __root(), __end_node());}
+        -: 1414:    template <class _Key>
+        -: 1415:    _LIBCPP_HIDE_FROM_ABI const_iterator __upper_bound(const _Key& __v,
+        -: 1416:                                     __node_pointer __root,
+        -: 1417:                                     __iter_pointer __result) const;
+        -: 1418:    template <class _Key>
+        -: 1419:    _LIBCPP_HIDE_FROM_ABI pair<iterator, iterator>
+        -: 1420:        __equal_range_unique(const _Key& __k);
+        -: 1421:    template <class _Key>
+        -: 1422:    _LIBCPP_HIDE_FROM_ABI pair<const_iterator, const_iterator>
+        -: 1423:        __equal_range_unique(const _Key& __k) const;
+        -: 1424:
+        -: 1425:    template <class _Key>
+        -: 1426:    _LIBCPP_HIDE_FROM_ABI pair<iterator, iterator>
+        -: 1427:        __equal_range_multi(const _Key& __k);
+        -: 1428:    template <class _Key>
+        -: 1429:    _LIBCPP_HIDE_FROM_ABI pair<const_iterator, const_iterator>
+        -: 1430:        __equal_range_multi(const _Key& __k) const;
+        -: 1431:
+        -: 1432:    typedef __tree_node_destructor<__node_allocator> _Dp;
+        -: 1433:    typedef unique_ptr<__node, _Dp> __node_holder;
+        -: 1434:
+        -: 1435:    _LIBCPP_HIDE_FROM_ABI __node_holder remove(const_iterator __p) _NOEXCEPT;
+        -: 1436:private:
+        -: 1437:    _LIBCPP_HIDE_FROM_ABI __node_base_pointer& __find_leaf_low(__parent_pointer& __parent, const key_type& __v);
+        -: 1438:    _LIBCPP_HIDE_FROM_ABI __node_base_pointer& __find_leaf_high(__parent_pointer& __parent, const key_type& __v);
+        -: 1439:    _LIBCPP_HIDE_FROM_ABI __node_base_pointer&
+        -: 1440:    __find_leaf(const_iterator __hint, __parent_pointer& __parent, const key_type& __v);
+        -: 1441:    // FIXME: Make this function const qualified. Unfortunately doing so
+        -: 1442:    // breaks existing code which uses non-const callable comparators.
+        -: 1443:    template <class _Key>
+        -: 1444:    _LIBCPP_HIDE_FROM_ABI __node_base_pointer& __find_equal(__parent_pointer& __parent, const _Key& __v);
+        -: 1445:    template <class _Key>
+        -: 1446:    _LIBCPP_INLINE_VISIBILITY __node_base_pointer&
+        -: 1447:    __find_equal(__parent_pointer& __parent, const _Key& __v) const {
+        -: 1448:      return const_cast<__tree*>(this)->__find_equal(__parent, __v);
+        -: 1449:    }
+        -: 1450:    template <class _Key>
+        -: 1451:    _LIBCPP_HIDE_FROM_ABI __node_base_pointer&
+        -: 1452:        __find_equal(const_iterator __hint, __parent_pointer& __parent,
+        -: 1453:                     __node_base_pointer& __dummy,
+        -: 1454:                     const _Key& __v);
+        -: 1455:
+        -: 1456:    template <class ..._Args>
+        -: 1457:    _LIBCPP_HIDE_FROM_ABI __node_holder __construct_node(_Args&& ...__args);
+        -: 1458:
+        -: 1459:    // TODO: Make this _LIBCPP_HIDE_FROM_ABI
+        -: 1460:    _LIBCPP_HIDDEN void destroy(__node_pointer __nd) _NOEXCEPT;
+        -: 1461:
+        -: 1462:    _LIBCPP_INLINE_VISIBILITY
+        -: 1463:    void __copy_assign_alloc(const __tree& __t)
+        -: 1464:        {__copy_assign_alloc(__t, integral_constant<bool,
+        -: 1465:             __node_traits::propagate_on_container_copy_assignment::value>());}
+        -: 1466:
+        -: 1467:    _LIBCPP_INLINE_VISIBILITY
+        -: 1468:    void __copy_assign_alloc(const __tree& __t, true_type)
+        -: 1469:        {
+        -: 1470:        if (__node_alloc() != __t.__node_alloc())
+        -: 1471:            clear();
+        -: 1472:        __node_alloc() = __t.__node_alloc();
+        -: 1473:        }
+        -: 1474:    _LIBCPP_INLINE_VISIBILITY
+        -: 1475:    void __copy_assign_alloc(const __tree&, false_type) {}
+        -: 1476:
+        -: 1477:    _LIBCPP_HIDE_FROM_ABI void __move_assign(__tree& __t, false_type);
+        -: 1478:    _LIBCPP_HIDE_FROM_ABI void __move_assign(__tree& __t, true_type)
+        -: 1479:        _NOEXCEPT_(is_nothrow_move_assignable<value_compare>::value &&
+        -: 1480:                   is_nothrow_move_assignable<__node_allocator>::value);
+        -: 1481:
+        -: 1482:    _LIBCPP_INLINE_VISIBILITY
+        -: 1483:    void __move_assign_alloc(__tree& __t)
+        -: 1484:        _NOEXCEPT_(
+        -: 1485:            !__node_traits::propagate_on_container_move_assignment::value ||
+        -: 1486:            is_nothrow_move_assignable<__node_allocator>::value)
+        -: 1487:        {__move_assign_alloc(__t, integral_constant<bool,
+        -: 1488:             __node_traits::propagate_on_container_move_assignment::value>());}
+        -: 1489:
+        -: 1490:    _LIBCPP_INLINE_VISIBILITY
+        -: 1491:    void __move_assign_alloc(__tree& __t, true_type)
+        -: 1492:        _NOEXCEPT_(is_nothrow_move_assignable<__node_allocator>::value)
+        -: 1493:        {__node_alloc() = _VSTD::move(__t.__node_alloc());}
+        -: 1494:    _LIBCPP_INLINE_VISIBILITY
+        -: 1495:    void __move_assign_alloc(__tree&, false_type) _NOEXCEPT {}
+        -: 1496:
+        -: 1497:    struct _DetachedTreeCache {
+        -: 1498:      _LIBCPP_INLINE_VISIBILITY
+        -: 1499:      explicit _DetachedTreeCache(__tree *__t) _NOEXCEPT : __t_(__t),
+        -: 1500:        __cache_root_(__detach_from_tree(__t)) {
+        -: 1501:          __advance();
+        -: 1502:        }
+        -: 1503:
+        -: 1504:      _LIBCPP_INLINE_VISIBILITY
+        -: 1505:      __node_pointer __get() const _NOEXCEPT {
+        -: 1506:        return __cache_elem_;
+        -: 1507:      }
+        -: 1508:
+        -: 1509:      _LIBCPP_INLINE_VISIBILITY
+        -: 1510:      void __advance() _NOEXCEPT {
+        -: 1511:        __cache_elem_ = __cache_root_;
+        -: 1512:        if (__cache_root_) {
+        -: 1513:          __cache_root_ = __detach_next(__cache_root_);
+        -: 1514:        }
+        -: 1515:      }
+        -: 1516:
+        -: 1517:      _LIBCPP_INLINE_VISIBILITY
+        -: 1518:      ~_DetachedTreeCache() {
+        -: 1519:        __t_->destroy(__cache_elem_);
+        -: 1520:        if (__cache_root_) {
+        -: 1521:          while (__cache_root_->__parent_ != nullptr)
+        -: 1522:            __cache_root_ = static_cast<__node_pointer>(__cache_root_->__parent_);
+        -: 1523:          __t_->destroy(__cache_root_);
+        -: 1524:        }
+        -: 1525:      }
+        -: 1526:
+        -: 1527:       _DetachedTreeCache(_DetachedTreeCache const&) = delete;
+        -: 1528:       _DetachedTreeCache& operator=(_DetachedTreeCache const&) = delete;
+        -: 1529:
+        -: 1530:    private:
+        -: 1531:      _LIBCPP_INLINE_VISIBILITY
+        -: 1532:      static __node_pointer __detach_from_tree(__tree *__t) _NOEXCEPT;
+        -: 1533:      _LIBCPP_INLINE_VISIBILITY
+        -: 1534:      static __node_pointer __detach_next(__node_pointer) _NOEXCEPT;
+        -: 1535:
+        -: 1536:      __tree *__t_;
+        -: 1537:      __node_pointer __cache_root_;
+        -: 1538:      __node_pointer __cache_elem_;
+        -: 1539:    };
+        -: 1540:
+        -: 1541:
+        -: 1542:    template <class, class, class, class> friend class _LIBCPP_TEMPLATE_VIS map;
+        -: 1543:    template <class, class, class, class> friend class _LIBCPP_TEMPLATE_VIS multimap;
+        -: 1544:};
+        -: 1545:
+        -: 1546:template <class _Tp, class _Compare, class _Allocator>
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEEC1ERKSC_ called 0 returned 0% blocks executed 0%
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEEC2ERKSC_ called 0 returned 0% blocks executed 0%
+    #####: 1547:__tree<_Tp, _Compare, _Allocator>::__tree(const value_compare& __comp)
+        -: 1548:        _NOEXCEPT_(
+        -: 1549:            is_nothrow_default_constructible<__node_allocator>::value &&
+        -: 1550:            is_nothrow_copy_constructible<value_compare>::value)
+    #####: 1551:    : __pair3_(0, __comp)
+branch  0 never executed
+branch  1 never executed
+    #####: 1552:{
+    #####: 1553:    __begin_node() = __end_node();
+    #####: 1554:}
+        -: 1555:
+        -: 1556:template <class _Tp, class _Compare, class _Allocator>
+        -: 1557:__tree<_Tp, _Compare, _Allocator>::__tree(const allocator_type& __a)
+        -: 1558:    : __begin_node_(__iter_pointer()),
+        -: 1559:      __pair1_(__default_init_tag(), __node_allocator(__a)),
+        -: 1560:      __pair3_(0, __default_init_tag())
+        -: 1561:{
+        -: 1562:    __begin_node() = __end_node();
+        -: 1563:}
+        -: 1564:
+        -: 1565:template <class _Tp, class _Compare, class _Allocator>
+        -: 1566:__tree<_Tp, _Compare, _Allocator>::__tree(const value_compare& __comp,
+        -: 1567:                                           const allocator_type& __a)
+        -: 1568:    : __begin_node_(__iter_pointer()),
+        -: 1569:      __pair1_(__default_init_tag(), __node_allocator(__a)),
+        -: 1570:      __pair3_(0, __comp)
+        -: 1571:{
+        -: 1572:    __begin_node() = __end_node();
+        -: 1573:}
+        -: 1574:
+        -: 1575:// Precondition:  size() != 0
+        -: 1576:template <class _Tp, class _Compare, class _Allocator>
+        -: 1577:typename __tree<_Tp, _Compare, _Allocator>::__node_pointer
+        -: 1578:__tree<_Tp, _Compare, _Allocator>::_DetachedTreeCache::__detach_from_tree(__tree *__t) _NOEXCEPT
+        -: 1579:{
+        -: 1580:    __node_pointer __cache = static_cast<__node_pointer>(__t->__begin_node());
+        -: 1581:    __t->__begin_node() = __t->__end_node();
+        -: 1582:    __t->__end_node()->__left_->__parent_ = nullptr;
+        -: 1583:    __t->__end_node()->__left_ = nullptr;
+        -: 1584:    __t->size() = 0;
+        -: 1585:    // __cache->__left_ == nullptr
+        -: 1586:    if (__cache->__right_ != nullptr)
+        -: 1587:        __cache = static_cast<__node_pointer>(__cache->__right_);
+        -: 1588:    // __cache->__left_ == nullptr
+        -: 1589:    // __cache->__right_ == nullptr
+        -: 1590:    return __cache;
+        -: 1591:}
+        -: 1592:
+        -: 1593:// Precondition:  __cache != nullptr
+        -: 1594://    __cache->left_ == nullptr
+        -: 1595://    __cache->right_ == nullptr
+        -: 1596://    This is no longer a red-black tree
+        -: 1597:template <class _Tp, class _Compare, class _Allocator>
+        -: 1598:typename __tree<_Tp, _Compare, _Allocator>::__node_pointer
+        -: 1599:__tree<_Tp, _Compare, _Allocator>::_DetachedTreeCache::__detach_next(__node_pointer __cache) _NOEXCEPT
+        -: 1600:{
+        -: 1601:    if (__cache->__parent_ == nullptr)
+        -: 1602:        return nullptr;
+        -: 1603:    if (_VSTD::__tree_is_left_child(static_cast<__node_base_pointer>(__cache)))
+        -: 1604:    {
+        -: 1605:        __cache->__parent_->__left_ = nullptr;
+        -: 1606:        __cache = static_cast<__node_pointer>(__cache->__parent_);
+        -: 1607:        if (__cache->__right_ == nullptr)
+        -: 1608:            return __cache;
+        -: 1609:        return static_cast<__node_pointer>(_VSTD::__tree_leaf(__cache->__right_));
+        -: 1610:    }
+        -: 1611:    // __cache is right child
+        -: 1612:    __cache->__parent_unsafe()->__right_ = nullptr;
+        -: 1613:    __cache = static_cast<__node_pointer>(__cache->__parent_);
+        -: 1614:    if (__cache->__left_ == nullptr)
+        -: 1615:        return __cache;
+        -: 1616:    return static_cast<__node_pointer>(_VSTD::__tree_leaf(__cache->__left_));
+        -: 1617:}
+        -: 1618:
+        -: 1619:template <class _Tp, class _Compare, class _Allocator>
+        -: 1620:__tree<_Tp, _Compare, _Allocator>&
+        -: 1621:__tree<_Tp, _Compare, _Allocator>::operator=(const __tree& __t)
+        -: 1622:{
+        -: 1623:    if (this != _VSTD::addressof(__t))
+        -: 1624:    {
+        -: 1625:        value_comp() = __t.value_comp();
+        -: 1626:        __copy_assign_alloc(__t);
+        -: 1627:        __assign_multi(__t.begin(), __t.end());
+        -: 1628:    }
+        -: 1629:    return *this;
+        -: 1630:}
+        -: 1631:
+        -: 1632:template <class _Tp, class _Compare, class _Allocator>
+        -: 1633:template <class _ForwardIterator>
+        -: 1634:void
+        -: 1635:__tree<_Tp, _Compare, _Allocator>::__assign_unique(_ForwardIterator __first, _ForwardIterator __last)
+        -: 1636:{
+        -: 1637:    typedef iterator_traits<_ForwardIterator> _ITraits;
+        -: 1638:    typedef typename _ITraits::value_type _ItValueType;
+        -: 1639:    static_assert((is_same<_ItValueType, __container_value_type>::value),
+        -: 1640:                  "__assign_unique may only be called with the containers value type");
+        -: 1641:    static_assert(__has_forward_iterator_category<_ForwardIterator>::value,
+        -: 1642:                  "__assign_unique requires a forward iterator");
+        -: 1643:    if (size() != 0)
+        -: 1644:    {
+        -: 1645:        _DetachedTreeCache __cache(this);
+        -: 1646:          for (; __cache.__get() != nullptr && __first != __last; ++__first) {
+        -: 1647:              if (__node_assign_unique(*__first, __cache.__get()).second)
+        -: 1648:                  __cache.__advance();
+        -: 1649:            }
+        -: 1650:    }
+        -: 1651:    for (; __first != __last; ++__first)
+        -: 1652:        __insert_unique(*__first);
+        -: 1653:}
+        -: 1654:
+        -: 1655:template <class _Tp, class _Compare, class _Allocator>
+        -: 1656:template <class _InputIterator>
+        -: 1657:void
+        -: 1658:__tree<_Tp, _Compare, _Allocator>::__assign_multi(_InputIterator __first, _InputIterator __last)
+        -: 1659:{
+        -: 1660:    typedef iterator_traits<_InputIterator> _ITraits;
+        -: 1661:    typedef typename _ITraits::value_type _ItValueType;
+        -: 1662:    static_assert((is_same<_ItValueType, __container_value_type>::value ||
+        -: 1663:                  is_same<_ItValueType, __node_value_type>::value),
+        -: 1664:                  "__assign_multi may only be called with the containers value type"
+        -: 1665:                  " or the nodes value type");
+        -: 1666:    if (size() != 0)
+        -: 1667:    {
+        -: 1668:        _DetachedTreeCache __cache(this);
+        -: 1669:        for (; __cache.__get() && __first != __last; ++__first) {
+        -: 1670:            __cache.__get()->__value_ = *__first;
+        -: 1671:            __node_insert_multi(__cache.__get());
+        -: 1672:            __cache.__advance();
+        -: 1673:        }
+        -: 1674:    }
+        -: 1675:    for (; __first != __last; ++__first)
+        -: 1676:        __insert_multi(_NodeTypes::__get_value(*__first));
+        -: 1677:}
+        -: 1678:
+        -: 1679:template <class _Tp, class _Compare, class _Allocator>
+        -: 1680:__tree<_Tp, _Compare, _Allocator>::__tree(const __tree& __t)
+        -: 1681:    : __begin_node_(__iter_pointer()),
+        -: 1682:      __pair1_(__default_init_tag(), __node_traits::select_on_container_copy_construction(__t.__node_alloc())),
+        -: 1683:      __pair3_(0, __t.value_comp())
+        -: 1684:{
+        -: 1685:    __begin_node() = __end_node();
+        -: 1686:}
+        -: 1687:
+        -: 1688:template <class _Tp, class _Compare, class _Allocator>
+        -: 1689:__tree<_Tp, _Compare, _Allocator>::__tree(__tree&& __t)
+        -: 1690:    _NOEXCEPT_(
+        -: 1691:        is_nothrow_move_constructible<__node_allocator>::value &&
+        -: 1692:        is_nothrow_move_constructible<value_compare>::value)
+        -: 1693:    : __begin_node_(_VSTD::move(__t.__begin_node_)),
+        -: 1694:      __pair1_(_VSTD::move(__t.__pair1_)),
+        -: 1695:      __pair3_(_VSTD::move(__t.__pair3_))
+        -: 1696:{
+        -: 1697:    if (size() == 0)
+        -: 1698:        __begin_node() = __end_node();
+        -: 1699:    else
+        -: 1700:    {
+        -: 1701:        __end_node()->__left_->__parent_ = static_cast<__parent_pointer>(__end_node());
+        -: 1702:        __t.__begin_node() = __t.__end_node();
+        -: 1703:        __t.__end_node()->__left_ = nullptr;
+        -: 1704:        __t.size() = 0;
+        -: 1705:    }
+        -: 1706:}
+        -: 1707:
+        -: 1708:template <class _Tp, class _Compare, class _Allocator>
+        -: 1709:__tree<_Tp, _Compare, _Allocator>::__tree(__tree&& __t, const allocator_type& __a)
+        -: 1710:    : __pair1_(__default_init_tag(), __node_allocator(__a)),
+        -: 1711:      __pair3_(0, _VSTD::move(__t.value_comp()))
+        -: 1712:{
+        -: 1713:    if (__a == __t.__alloc())
+        -: 1714:    {
+        -: 1715:        if (__t.size() == 0)
+        -: 1716:            __begin_node() = __end_node();
+        -: 1717:        else
+        -: 1718:        {
+        -: 1719:            __begin_node() = __t.__begin_node();
+        -: 1720:            __end_node()->__left_ = __t.__end_node()->__left_;
+        -: 1721:            __end_node()->__left_->__parent_ = static_cast<__parent_pointer>(__end_node());
+        -: 1722:            size() = __t.size();
+        -: 1723:            __t.__begin_node() = __t.__end_node();
+        -: 1724:            __t.__end_node()->__left_ = nullptr;
+        -: 1725:            __t.size() = 0;
+        -: 1726:        }
+        -: 1727:    }
+        -: 1728:    else
+        -: 1729:    {
+        -: 1730:        __begin_node() = __end_node();
+        -: 1731:    }
+        -: 1732:}
+        -: 1733:
+        -: 1734:template <class _Tp, class _Compare, class _Allocator>
+        -: 1735:void
+        -: 1736:__tree<_Tp, _Compare, _Allocator>::__move_assign(__tree& __t, true_type)
+        -: 1737:    _NOEXCEPT_(is_nothrow_move_assignable<value_compare>::value &&
+        -: 1738:               is_nothrow_move_assignable<__node_allocator>::value)
+        -: 1739:{
+        -: 1740:    destroy(static_cast<__node_pointer>(__end_node()->__left_));
+        -: 1741:    __begin_node_ = __t.__begin_node_;
+        -: 1742:    __pair1_.first() = __t.__pair1_.first();
+        -: 1743:    __move_assign_alloc(__t);
+        -: 1744:    __pair3_ = _VSTD::move(__t.__pair3_);
+        -: 1745:    if (size() == 0)
+        -: 1746:        __begin_node() = __end_node();
+        -: 1747:    else
+        -: 1748:    {
+        -: 1749:        __end_node()->__left_->__parent_ = static_cast<__parent_pointer>(__end_node());
+        -: 1750:        __t.__begin_node() = __t.__end_node();
+        -: 1751:        __t.__end_node()->__left_ = nullptr;
+        -: 1752:        __t.size() = 0;
+        -: 1753:    }
+        -: 1754:}
+        -: 1755:
+        -: 1756:template <class _Tp, class _Compare, class _Allocator>
+        -: 1757:void
+        -: 1758:__tree<_Tp, _Compare, _Allocator>::__move_assign(__tree& __t, false_type)
+        -: 1759:{
+        -: 1760:    if (__node_alloc() == __t.__node_alloc())
+        -: 1761:        __move_assign(__t, true_type());
+        -: 1762:    else
+        -: 1763:    {
+        -: 1764:        value_comp() = _VSTD::move(__t.value_comp());
+        -: 1765:        const_iterator __e = end();
+        -: 1766:        if (size() != 0)
+        -: 1767:        {
+        -: 1768:            _DetachedTreeCache __cache(this);
+        -: 1769:            while (__cache.__get() != nullptr && __t.size() != 0) {
+        -: 1770:              __cache.__get()->__value_ = _VSTD::move(__t.remove(__t.begin())->__value_);
+        -: 1771:              __node_insert_multi(__cache.__get());
+        -: 1772:              __cache.__advance();
+        -: 1773:            }
+        -: 1774:        }
+        -: 1775:        while (__t.size() != 0)
+        -: 1776:            __insert_multi(__e, _NodeTypes::__move(__t.remove(__t.begin())->__value_));
+        -: 1777:    }
+        -: 1778:}
+        -: 1779:
+        -: 1780:template <class _Tp, class _Compare, class _Allocator>
+        -: 1781:__tree<_Tp, _Compare, _Allocator>&
+        -: 1782:__tree<_Tp, _Compare, _Allocator>::operator=(__tree&& __t)
+        -: 1783:    _NOEXCEPT_(
+        -: 1784:        __node_traits::propagate_on_container_move_assignment::value &&
+        -: 1785:        is_nothrow_move_assignable<value_compare>::value &&
+        -: 1786:        is_nothrow_move_assignable<__node_allocator>::value)
+        -: 1787:
+        -: 1788:{
+        -: 1789:    __move_assign(__t, integral_constant<bool,
+        -: 1790:                  __node_traits::propagate_on_container_move_assignment::value>());
+        -: 1791:    return *this;
+        -: 1792:}
+        -: 1793:
+        -: 1794:template <class _Tp, class _Compare, class _Allocator>
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEED1Ev called 0 returned 0% blocks executed 0%
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEED2Ev called 0 returned 0% blocks executed 0%
+    #####: 1795:__tree<_Tp, _Compare, _Allocator>::~__tree()
+    #####: 1796:{
+        -: 1797:    static_assert((is_copy_constructible<value_compare>::value),
+        -: 1798:                 "Comparator must be copy-constructible.");
+    #####: 1799:  destroy(__root());
+    #####: 1800:}
+        -: 1801:
+        -: 1802:template <class _Tp, class _Compare, class _Allocator>
+        -: 1803:void
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE7destroyEPNS_11__tree_nodeIS8_PvEE called 0 returned 0% blocks executed 0%
+    #####: 1804:__tree<_Tp, _Compare, _Allocator>::destroy(__node_pointer __nd) _NOEXCEPT
+        -: 1805:{
+    #####: 1806:    if (__nd != nullptr)
+branch  0 never executed
+branch  1 never executed
+        -: 1807:    {
+    #####: 1808:        destroy(static_cast<__node_pointer>(__nd->__left_));
+    #####: 1809:        destroy(static_cast<__node_pointer>(__nd->__right_));
+    #####: 1810:        __node_allocator& __na = __node_alloc();
+    #####: 1811:        __node_traits::destroy(__na, _NodeTypes::__get_ptr(__nd->__value_));
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####: 1812:        __node_traits::deallocate(__na, __nd, 1);
+    #####: 1813:    }
+    #####: 1814:}
+        -: 1815:
+        -: 1816:template <class _Tp, class _Compare, class _Allocator>
+        -: 1817:void
+        -: 1818:__tree<_Tp, _Compare, _Allocator>::swap(__tree& __t)
+        -: 1819:#if _LIBCPP_STD_VER <= 11
+        -: 1820:        _NOEXCEPT_(
+        -: 1821:            __is_nothrow_swappable<value_compare>::value
+        -: 1822:            && (!__node_traits::propagate_on_container_swap::value ||
+        -: 1823:                 __is_nothrow_swappable<__node_allocator>::value)
+        -: 1824:            )
+        -: 1825:#else
+        -: 1826:        _NOEXCEPT_(__is_nothrow_swappable<value_compare>::value)
+        -: 1827:#endif
+        -: 1828:{
+        -: 1829:    using _VSTD::swap;
+        -: 1830:    swap(__begin_node_, __t.__begin_node_);
+        -: 1831:    swap(__pair1_.first(), __t.__pair1_.first());
+        -: 1832:    _VSTD::__swap_allocator(__node_alloc(), __t.__node_alloc());
+        -: 1833:    __pair3_.swap(__t.__pair3_);
+        -: 1834:    if (size() == 0)
+        -: 1835:        __begin_node() = __end_node();
+        -: 1836:    else
+        -: 1837:        __end_node()->__left_->__parent_ = static_cast<__parent_pointer>(__end_node());
+        -: 1838:    if (__t.size() == 0)
+        -: 1839:        __t.__begin_node() = __t.__end_node();
+        -: 1840:    else
+        -: 1841:        __t.__end_node()->__left_->__parent_ = static_cast<__parent_pointer>(__t.__end_node());
+        -: 1842:}
+        -: 1843:
+        -: 1844:template <class _Tp, class _Compare, class _Allocator>
+        -: 1845:void
+        -: 1846:__tree<_Tp, _Compare, _Allocator>::clear() _NOEXCEPT
+        -: 1847:{
+        -: 1848:    destroy(__root());
+        -: 1849:    size() = 0;
+        -: 1850:    __begin_node() = __end_node();
+        -: 1851:    __end_node()->__left_ = nullptr;
+        -: 1852:}
+        -: 1853:
+        -: 1854:// Find lower_bound place to insert
+        -: 1855:// Set __parent to parent of null leaf
+        -: 1856:// Return reference to null leaf
+        -: 1857:template <class _Tp, class _Compare, class _Allocator>
+        -: 1858:typename __tree<_Tp, _Compare, _Allocator>::__node_base_pointer&
+        -: 1859:__tree<_Tp, _Compare, _Allocator>::__find_leaf_low(__parent_pointer& __parent,
+        -: 1860:                                                   const key_type& __v)
+        -: 1861:{
+        -: 1862:    __node_pointer __nd = __root();
+        -: 1863:    if (__nd != nullptr)
+        -: 1864:    {
+        -: 1865:        while (true)
+        -: 1866:        {
+        -: 1867:            if (value_comp()(__nd->__value_, __v))
+        -: 1868:            {
+        -: 1869:                if (__nd->__right_ != nullptr)
+        -: 1870:                    __nd = static_cast<__node_pointer>(__nd->__right_);
+        -: 1871:                else
+        -: 1872:                {
+        -: 1873:                    __parent = static_cast<__parent_pointer>(__nd);
+        -: 1874:                    return __nd->__right_;
+        -: 1875:                }
+        -: 1876:            }
+        -: 1877:            else
+        -: 1878:            {
+        -: 1879:                if (__nd->__left_ != nullptr)
+        -: 1880:                    __nd = static_cast<__node_pointer>(__nd->__left_);
+        -: 1881:                else
+        -: 1882:                {
+        -: 1883:                    __parent = static_cast<__parent_pointer>(__nd);
+        -: 1884:                    return __parent->__left_;
+        -: 1885:                }
+        -: 1886:            }
+        -: 1887:        }
+        -: 1888:    }
+        -: 1889:    __parent = static_cast<__parent_pointer>(__end_node());
+        -: 1890:    return __parent->__left_;
+        -: 1891:}
+        -: 1892:
+        -: 1893:// Find upper_bound place to insert
+        -: 1894:// Set __parent to parent of null leaf
+        -: 1895:// Return reference to null leaf
+        -: 1896:template <class _Tp, class _Compare, class _Allocator>
+        -: 1897:typename __tree<_Tp, _Compare, _Allocator>::__node_base_pointer&
+        -: 1898:__tree<_Tp, _Compare, _Allocator>::__find_leaf_high(__parent_pointer& __parent,
+        -: 1899:                                                    const key_type& __v)
+        -: 1900:{
+        -: 1901:    __node_pointer __nd = __root();
+        -: 1902:    if (__nd != nullptr)
+        -: 1903:    {
+        -: 1904:        while (true)
+        -: 1905:        {
+        -: 1906:            if (value_comp()(__v, __nd->__value_))
+        -: 1907:            {
+        -: 1908:                if (__nd->__left_ != nullptr)
+        -: 1909:                    __nd = static_cast<__node_pointer>(__nd->__left_);
+        -: 1910:                else
+        -: 1911:                {
+        -: 1912:                    __parent = static_cast<__parent_pointer>(__nd);
+        -: 1913:                    return __parent->__left_;
+        -: 1914:                }
+        -: 1915:            }
+        -: 1916:            else
+        -: 1917:            {
+        -: 1918:                if (__nd->__right_ != nullptr)
+        -: 1919:                    __nd = static_cast<__node_pointer>(__nd->__right_);
+        -: 1920:                else
+        -: 1921:                {
+        -: 1922:                    __parent = static_cast<__parent_pointer>(__nd);
+        -: 1923:                    return __nd->__right_;
+        -: 1924:                }
+        -: 1925:            }
+        -: 1926:        }
+        -: 1927:    }
+        -: 1928:    __parent = static_cast<__parent_pointer>(__end_node());
+        -: 1929:    return __parent->__left_;
+        -: 1930:}
+        -: 1931:
+        -: 1932:// Find leaf place to insert closest to __hint
+        -: 1933:// First check prior to __hint.
+        -: 1934:// Next check after __hint.
+        -: 1935:// Next do O(log N) search.
+        -: 1936:// Set __parent to parent of null leaf
+        -: 1937:// Return reference to null leaf
+        -: 1938:template <class _Tp, class _Compare, class _Allocator>
+        -: 1939:typename __tree<_Tp, _Compare, _Allocator>::__node_base_pointer&
+        -: 1940:__tree<_Tp, _Compare, _Allocator>::__find_leaf(const_iterator __hint,
+        -: 1941:                                               __parent_pointer& __parent,
+        -: 1942:                                               const key_type& __v)
+        -: 1943:{
+        -: 1944:    if (__hint == end() || !value_comp()(*__hint, __v))  // check before
+        -: 1945:    {
+        -: 1946:        // __v <= *__hint
+        -: 1947:        const_iterator __prior = __hint;
+        -: 1948:        if (__prior == begin() || !value_comp()(__v, *--__prior))
+        -: 1949:        {
+        -: 1950:            // *prev(__hint) <= __v <= *__hint
+        -: 1951:            if (__hint.__ptr_->__left_ == nullptr)
+        -: 1952:            {
+        -: 1953:                __parent = static_cast<__parent_pointer>(__hint.__ptr_);
+        -: 1954:                return __parent->__left_;
+        -: 1955:            }
+        -: 1956:            else
+        -: 1957:            {
+        -: 1958:                __parent = static_cast<__parent_pointer>(__prior.__ptr_);
+        -: 1959:                return static_cast<__node_base_pointer>(__prior.__ptr_)->__right_;
+        -: 1960:            }
+        -: 1961:        }
+        -: 1962:        // __v < *prev(__hint)
+        -: 1963:        return __find_leaf_high(__parent, __v);
+        -: 1964:    }
+        -: 1965:    // else __v > *__hint
+        -: 1966:    return __find_leaf_low(__parent, __v);
+        -: 1967:}
+        -: 1968:
+        -: 1969:// Find place to insert if __v doesn't exist
+        -: 1970:// Set __parent to parent of null leaf
+        -: 1971:// Return reference to null leaf
+        -: 1972:// If __v exists, set parent to node of __v and return reference to node of __v
+        -: 1973:template <class _Tp, class _Compare, class _Allocator>
+        -: 1974:template <class _Key>
+        -: 1975:typename __tree<_Tp, _Compare, _Allocator>::__node_base_pointer&
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE12__find_equalIS7_EERPNS_16__tree_node_baseIPvEERPNS_15__tree_end_nodeISJ_EERKT_ called 0 returned 0% blocks executed 0%
+    #####: 1976:__tree<_Tp, _Compare, _Allocator>::__find_equal(__parent_pointer& __parent,
+        -: 1977:                                                const _Key& __v)
+        -: 1978:{
+    #####: 1979:    __node_pointer __nd = __root();
+    #####: 1980:    __node_base_pointer* __nd_ptr = __root_ptr();
+    #####: 1981:    if (__nd != nullptr)
+branch  0 never executed
+branch  1 never executed
+        -: 1982:    {
+    #####: 1983:        while (true)
+        -: 1984:        {
+    #####: 1985:            if (value_comp()(__v, __nd->__value_))
+branch  0 never executed
+branch  1 never executed
+        -: 1986:            {
+    #####: 1987:                if (__nd->__left_ != nullptr) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1988:                    __nd_ptr = _VSTD::addressof(__nd->__left_);
+    #####: 1989:                    __nd = static_cast<__node_pointer>(__nd->__left_);
+    #####: 1990:                } else {
+    #####: 1991:                    __parent = static_cast<__parent_pointer>(__nd);
+    #####: 1992:                    return __parent->__left_;
+        -: 1993:                }
+    #####: 1994:            }
+    #####: 1995:            else if (value_comp()(__nd->__value_, __v))
+branch  0 never executed
+branch  1 never executed
+        -: 1996:            {
+    #####: 1997:                if (__nd->__right_ != nullptr) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1998:                    __nd_ptr = _VSTD::addressof(__nd->__right_);
+    #####: 1999:                    __nd = static_cast<__node_pointer>(__nd->__right_);
+    #####: 2000:                } else {
+    #####: 2001:                    __parent = static_cast<__parent_pointer>(__nd);
+    #####: 2002:                    return __nd->__right_;
+        -: 2003:                }
+    #####: 2004:            }
+        -: 2005:            else
+        -: 2006:            {
+    #####: 2007:                __parent = static_cast<__parent_pointer>(__nd);
+    #####: 2008:                return *__nd_ptr;
+        -: 2009:            }
+        -: 2010:        }
+        -: 2011:    }
+    #####: 2012:    __parent = static_cast<__parent_pointer>(__end_node());
+    #####: 2013:    return __parent->__left_;
+    #####: 2014:}
+        -: 2015:
+        -: 2016:// Find place to insert if __v doesn't exist
+        -: 2017:// First check prior to __hint.
+        -: 2018:// Next check after __hint.
+        -: 2019:// Next do O(log N) search.
+        -: 2020:// Set __parent to parent of null leaf
+        -: 2021:// Return reference to null leaf
+        -: 2022:// If __v exists, set parent to node of __v and return reference to node of __v
+        -: 2023:template <class _Tp, class _Compare, class _Allocator>
+        -: 2024:template <class _Key>
+        -: 2025:typename __tree<_Tp, _Compare, _Allocator>::__node_base_pointer&
+        -: 2026:__tree<_Tp, _Compare, _Allocator>::__find_equal(const_iterator __hint,
+        -: 2027:                                                __parent_pointer& __parent,
+        -: 2028:                                                __node_base_pointer& __dummy,
+        -: 2029:                                                const _Key& __v)
+        -: 2030:{
+        -: 2031:    if (__hint == end() || value_comp()(__v, *__hint))  // check before
+        -: 2032:    {
+        -: 2033:        // __v < *__hint
+        -: 2034:        const_iterator __prior = __hint;
+        -: 2035:        if (__prior == begin() || value_comp()(*--__prior, __v))
+        -: 2036:        {
+        -: 2037:            // *prev(__hint) < __v < *__hint
+        -: 2038:            if (__hint.__ptr_->__left_ == nullptr)
+        -: 2039:            {
+        -: 2040:                __parent = static_cast<__parent_pointer>(__hint.__ptr_);
+        -: 2041:                return __parent->__left_;
+        -: 2042:            }
+        -: 2043:            else
+        -: 2044:            {
+        -: 2045:                __parent = static_cast<__parent_pointer>(__prior.__ptr_);
+        -: 2046:                return static_cast<__node_base_pointer>(__prior.__ptr_)->__right_;
+        -: 2047:            }
+        -: 2048:        }
+        -: 2049:        // __v <= *prev(__hint)
+        -: 2050:        return __find_equal(__parent, __v);
+        -: 2051:    }
+        -: 2052:    else if (value_comp()(*__hint, __v))  // check after
+        -: 2053:    {
+        -: 2054:        // *__hint < __v
+        -: 2055:        const_iterator __next = _VSTD::next(__hint);
+        -: 2056:        if (__next == end() || value_comp()(__v, *__next))
+        -: 2057:        {
+        -: 2058:            // *__hint < __v < *_VSTD::next(__hint)
+        -: 2059:            if (__hint.__get_np()->__right_ == nullptr)
+        -: 2060:            {
+        -: 2061:                __parent = static_cast<__parent_pointer>(__hint.__ptr_);
+        -: 2062:                return static_cast<__node_base_pointer>(__hint.__ptr_)->__right_;
+        -: 2063:            }
+        -: 2064:            else
+        -: 2065:            {
+        -: 2066:                __parent = static_cast<__parent_pointer>(__next.__ptr_);
+        -: 2067:                return __parent->__left_;
+        -: 2068:            }
+        -: 2069:        }
+        -: 2070:        // *next(__hint) <= __v
+        -: 2071:        return __find_equal(__parent, __v);
+        -: 2072:    }
+        -: 2073:    // else __v == *__hint
+        -: 2074:    __parent = static_cast<__parent_pointer>(__hint.__ptr_);
+        -: 2075:    __dummy = static_cast<__node_base_pointer>(__hint.__ptr_);
+        -: 2076:    return __dummy;
+        -: 2077:}
+        -: 2078:
+        -: 2079:template <class _Tp, class _Compare, class _Allocator>
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE16__insert_node_atEPNS_15__tree_end_nodeIPNS_16__tree_node_baseIPvEEEERSJ_SJ_ called 0 returned 0% blocks executed 0%
+    #####: 2080:void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
+        -: 2081:    __parent_pointer __parent, __node_base_pointer& __child,
+        -: 2082:    __node_base_pointer __new_node) _NOEXCEPT
+        -: 2083:{
+    #####: 2084:    __new_node->__left_   = nullptr;
+    #####: 2085:    __new_node->__right_  = nullptr;
+    #####: 2086:    __new_node->__parent_ = __parent;
+        -: 2087:    // __new_node->__is_black_ is initialized in __tree_balance_after_insert
+    #####: 2088:    __child = __new_node;
+    #####: 2089:    if (__begin_node()->__left_ != nullptr)
+branch  0 never executed
+branch  1 never executed
+    #####: 2090:        __begin_node() = static_cast<__iter_pointer>(__begin_node()->__left_);
+    #####: 2091:    _VSTD::__tree_balance_after_insert(__end_node()->__left_, __child);
+    #####: 2092:    ++size();
+    #####: 2093:}
+        -: 2094:
+        -: 2095:template <class _Tp, class _Compare, class _Allocator>
+        -: 2096:template <class _Key, class... _Args>
+        -: 2097:pair<typename __tree<_Tp, _Compare, _Allocator>::iterator, bool>
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE25__emplace_unique_key_argsIS7_JRKNS_21piecewise_construct_tENS_5tupleIJOS7_EEENSJ_IJEEEEEENS_4pairINS_15__tree_iteratorIS8_PNS_11__tree_nodeIS8_PvEElEEbEERKT_DpOT0_ called 0 returned 0% blocks executed 0%
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE25__emplace_unique_key_argsIS7_JRKNS_21piecewise_construct_tENS_5tupleIJRKS7_EEENSJ_IJEEEEEENS_4pairINS_15__tree_iteratorIS8_PNS_11__tree_nodeIS8_PvEElEEbEERKT_DpOT0_ called 0 returned 0% blocks executed 0%
+    #####: 2098:__tree<_Tp, _Compare, _Allocator>::__emplace_unique_key_args(_Key const& __k, _Args&&... __args)
+        -: 2099:{
+        -: 2100:    __parent_pointer __parent;
+    #####: 2101:    __node_base_pointer& __child = __find_equal(__parent, __k);
+    #####: 2102:    __node_pointer __r = static_cast<__node_pointer>(__child);
+    #####: 2103:    bool __inserted = false;
+    #####: 2104:    if (__child == nullptr)
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -: 2105:    {
+    #####: 2106:        __node_holder __h = __construct_node(_VSTD::forward<_Args>(__args)...);
+    #####: 2107:        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
+    #####: 2108:        __r = __h.release();
+    #####: 2109:        __inserted = true;
+    #####: 2110:    }
+    #####: 2111:    return pair<iterator, bool>(iterator(__r), __inserted);
+        -: 2112:}
+        -: 2113:
+        -: 2114:template <class _Tp, class _Compare, class _Allocator>
+        -: 2115:template <class _Key, class... _Args>
+        -: 2116:pair<typename __tree<_Tp, _Compare, _Allocator>::iterator, bool>
+        -: 2117:__tree<_Tp, _Compare, _Allocator>::__emplace_hint_unique_key_args(
+        -: 2118:    const_iterator __p, _Key const& __k, _Args&&... __args)
+        -: 2119:{
+        -: 2120:    __parent_pointer __parent;
+        -: 2121:    __node_base_pointer __dummy;
+        -: 2122:    __node_base_pointer& __child = __find_equal(__p, __parent, __dummy, __k);
+        -: 2123:    __node_pointer __r = static_cast<__node_pointer>(__child);
+        -: 2124:    bool __inserted = false;
+        -: 2125:    if (__child == nullptr)
+        -: 2126:    {
+        -: 2127:        __node_holder __h = __construct_node(_VSTD::forward<_Args>(__args)...);
+        -: 2128:        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
+        -: 2129:        __r = __h.release();
+        -: 2130:        __inserted = true;
+        -: 2131:    }
+        -: 2132:    return pair<iterator, bool>(iterator(__r), __inserted);
+        -: 2133:}
+        -: 2134:
+        -: 2135:template <class _Tp, class _Compare, class _Allocator>
+        -: 2136:template <class ..._Args>
+        -: 2137:typename __tree<_Tp, _Compare, _Allocator>::__node_holder
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE16__construct_nodeIJRKNS_21piecewise_construct_tENS_5tupleIJOS7_EEENSJ_IJEEEEEENS_10unique_ptrINS_11__tree_nodeIS8_PvEENS_22__tree_node_destructorINS5_ISQ_EEEEEEDpOT_ called 0 returned 0% blocks executed 0%
+function _ZNSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE16__construct_nodeIJRKNS_21piecewise_construct_tENS_5tupleIJRKS7_EEENSJ_IJEEEEEENS_10unique_ptrINS_11__tree_nodeIS8_PvEENS_22__tree_node_destructorINS5_ISR_EEEEEEDpOT_ called 0 returned 0% blocks executed 0%
+    #####: 2138:__tree<_Tp, _Compare, _Allocator>::__construct_node(_Args&& ...__args)
+        -: 2139:{
+        -: 2140:    static_assert(!__is_tree_value_type<_Args...>::value,
+        -: 2141:                  "Cannot construct from __value_type");
+    #####: 2142:    __node_allocator& __na = __node_alloc();
+    #####: 2143:    __node_holder __h(__node_traits::allocate(__na, 1), _Dp(__na));
+    #####: 2144:    __node_traits::construct(__na, _NodeTypes::__get_ptr(__h->__value_), _VSTD::forward<_Args>(__args)...);
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+    #####: 2145:    __h.get_deleter().__value_constructed = true;
+    #####: 2146:    return __h;
+    #####: 2147:}
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+        -: 2148:
+        -: 2149:
+        -: 2150:template <class _Tp, class _Compare, class _Allocator>
+        -: 2151:template <class... _Args>
+        -: 2152:pair<typename __tree<_Tp, _Compare, _Allocator>::iterator, bool>
+        -: 2153:__tree<_Tp, _Compare, _Allocator>::__emplace_unique_impl(_Args&&... __args)
+        -: 2154:{
+        -: 2155:    __node_holder __h = __construct_node(_VSTD::forward<_Args>(__args)...);
+        -: 2156:    __parent_pointer __parent;
+        -: 2157:    __node_base_pointer& __child = __find_equal(__parent, __h->__value_);
+        -: 2158:    __node_pointer __r = static_cast<__node_pointer>(__child);
+        -: 2159:    bool __inserted = false;
+        -: 2160:    if (__child == nullptr)
+        -: 2161:    {
+        -: 2162:        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
+        -: 2163:        __r = __h.release();
+        -: 2164:        __inserted = true;
+        -: 2165:    }
+        -: 2166:    return pair<iterator, bool>(iterator(__r), __inserted);
+        -: 2167:}
+        -: 2168:
+        -: 2169:template <class _Tp, class _Compare, class _Allocator>
+        -: 2170:template <class... _Args>
+        -: 2171:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2172:__tree<_Tp, _Compare, _Allocator>::__emplace_hint_unique_impl(const_iterator __p, _Args&&... __args)
+        -: 2173:{
+        -: 2174:    __node_holder __h = __construct_node(_VSTD::forward<_Args>(__args)...);
+        -: 2175:    __parent_pointer __parent;
+        -: 2176:    __node_base_pointer __dummy;
+        -: 2177:    __node_base_pointer& __child = __find_equal(__p, __parent, __dummy, __h->__value_);
+        -: 2178:    __node_pointer __r = static_cast<__node_pointer>(__child);
+        -: 2179:    if (__child == nullptr)
+        -: 2180:    {
+        -: 2181:        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
+        -: 2182:        __r = __h.release();
+        -: 2183:    }
+        -: 2184:    return iterator(__r);
+        -: 2185:}
+        -: 2186:
+        -: 2187:template <class _Tp, class _Compare, class _Allocator>
+        -: 2188:template <class... _Args>
+        -: 2189:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2190:__tree<_Tp, _Compare, _Allocator>::__emplace_multi(_Args&&... __args)
+        -: 2191:{
+        -: 2192:    __node_holder __h = __construct_node(_VSTD::forward<_Args>(__args)...);
+        -: 2193:    __parent_pointer __parent;
+        -: 2194:    __node_base_pointer& __child = __find_leaf_high(__parent, _NodeTypes::__get_key(__h->__value_));
+        -: 2195:    __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
+        -: 2196:    return iterator(static_cast<__node_pointer>(__h.release()));
+        -: 2197:}
+        -: 2198:
+        -: 2199:template <class _Tp, class _Compare, class _Allocator>
+        -: 2200:template <class... _Args>
+        -: 2201:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2202:__tree<_Tp, _Compare, _Allocator>::__emplace_hint_multi(const_iterator __p,
+        -: 2203:                                                        _Args&&... __args)
+        -: 2204:{
+        -: 2205:    __node_holder __h = __construct_node(_VSTD::forward<_Args>(__args)...);
+        -: 2206:    __parent_pointer __parent;
+        -: 2207:    __node_base_pointer& __child = __find_leaf(__p, __parent, _NodeTypes::__get_key(__h->__value_));
+        -: 2208:    __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
+        -: 2209:    return iterator(static_cast<__node_pointer>(__h.release()));
+        -: 2210:}
+        -: 2211:
+        -: 2212:template <class _Tp, class _Compare, class _Allocator>
+        -: 2213:pair<typename __tree<_Tp, _Compare, _Allocator>::iterator, bool>
+        -: 2214:__tree<_Tp, _Compare, _Allocator>::__node_assign_unique(const __container_value_type& __v, __node_pointer __nd)
+        -: 2215:{
+        -: 2216:    __parent_pointer __parent;
+        -: 2217:    __node_base_pointer& __child = __find_equal(__parent, _NodeTypes::__get_key(__v));
+        -: 2218:    __node_pointer __r = static_cast<__node_pointer>(__child);
+        -: 2219:    bool __inserted = false;
+        -: 2220:    if (__child == nullptr)
+        -: 2221:    {
+        -: 2222:        __nd->__value_ = __v;
+        -: 2223:        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__nd));
+        -: 2224:        __r = __nd;
+        -: 2225:        __inserted = true;
+        -: 2226:    }
+        -: 2227:    return pair<iterator, bool>(iterator(__r), __inserted);
+        -: 2228:}
+        -: 2229:
+        -: 2230:
+        -: 2231:template <class _Tp, class _Compare, class _Allocator>
+        -: 2232:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2233:__tree<_Tp, _Compare, _Allocator>::__node_insert_multi(__node_pointer __nd)
+        -: 2234:{
+        -: 2235:    __parent_pointer __parent;
+        -: 2236:    __node_base_pointer& __child = __find_leaf_high(__parent, _NodeTypes::__get_key(__nd->__value_));
+        -: 2237:    __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__nd));
+        -: 2238:    return iterator(__nd);
+        -: 2239:}
+        -: 2240:
+        -: 2241:template <class _Tp, class _Compare, class _Allocator>
+        -: 2242:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2243:__tree<_Tp, _Compare, _Allocator>::__node_insert_multi(const_iterator __p,
+        -: 2244:                                                       __node_pointer __nd)
+        -: 2245:{
+        -: 2246:    __parent_pointer __parent;
+        -: 2247:    __node_base_pointer& __child = __find_leaf(__p, __parent, _NodeTypes::__get_key(__nd->__value_));
+        -: 2248:    __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__nd));
+        -: 2249:    return iterator(__nd);
+        -: 2250:}
+        -: 2251:
+        -: 2252:template <class _Tp, class _Compare, class _Allocator>
+        -: 2253:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2254:__tree<_Tp, _Compare, _Allocator>::__remove_node_pointer(__node_pointer __ptr) _NOEXCEPT
+        -: 2255:{
+        -: 2256:    iterator __r(__ptr);
+        -: 2257:    ++__r;
+        -: 2258:    if (__begin_node() == __ptr)
+        -: 2259:        __begin_node() = __r.__ptr_;
+        -: 2260:    --size();
+        -: 2261:    _VSTD::__tree_remove(__end_node()->__left_,
+        -: 2262:                         static_cast<__node_base_pointer>(__ptr));
+        -: 2263:    return __r;
+        -: 2264:}
+        -: 2265:
+        -: 2266:#if _LIBCPP_STD_VER >= 17
+        -: 2267:template <class _Tp, class _Compare, class _Allocator>
+        -: 2268:template <class _NodeHandle, class _InsertReturnType>
+        -: 2269:_LIBCPP_INLINE_VISIBILITY
+        -: 2270:_InsertReturnType
+        -: 2271:__tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(
+        -: 2272:    _NodeHandle&& __nh)
+        -: 2273:{
+        -: 2274:    if (__nh.empty())
+        -: 2275:        return _InsertReturnType{end(), false, _NodeHandle()};
+        -: 2276:
+        -: 2277:    __node_pointer __ptr = __nh.__ptr_;
+        -: 2278:    __parent_pointer __parent;
+        -: 2279:    __node_base_pointer& __child = __find_equal(__parent,
+        -: 2280:                                                __ptr->__value_);
+        -: 2281:    if (__child != nullptr)
+        -: 2282:        return _InsertReturnType{
+        -: 2283:            iterator(static_cast<__node_pointer>(__child)),
+        -: 2284:            false, _VSTD::move(__nh)};
+        -: 2285:
+        -: 2286:    __insert_node_at(__parent, __child,
+        -: 2287:                     static_cast<__node_base_pointer>(__ptr));
+        -: 2288:    __nh.__release_ptr();
+        -: 2289:    return _InsertReturnType{iterator(__ptr), true, _NodeHandle()};
+        -: 2290:}
+        -: 2291:
+        -: 2292:template <class _Tp, class _Compare, class _Allocator>
+        -: 2293:template <class _NodeHandle>
+        -: 2294:_LIBCPP_INLINE_VISIBILITY
+        -: 2295:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2296:__tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(
+        -: 2297:    const_iterator __hint, _NodeHandle&& __nh)
+        -: 2298:{
+        -: 2299:    if (__nh.empty())
+        -: 2300:        return end();
+        -: 2301:
+        -: 2302:    __node_pointer __ptr = __nh.__ptr_;
+        -: 2303:    __parent_pointer __parent;
+        -: 2304:    __node_base_pointer __dummy;
+        -: 2305:    __node_base_pointer& __child = __find_equal(__hint, __parent, __dummy,
+        -: 2306:                                                __ptr->__value_);
+        -: 2307:    __node_pointer __r = static_cast<__node_pointer>(__child);
+        -: 2308:    if (__child == nullptr)
+        -: 2309:    {
+        -: 2310:        __insert_node_at(__parent, __child,
+        -: 2311:                         static_cast<__node_base_pointer>(__ptr));
+        -: 2312:        __r = __ptr;
+        -: 2313:        __nh.__release_ptr();
+        -: 2314:    }
+        -: 2315:    return iterator(__r);
+        -: 2316:}
+        -: 2317:
+        -: 2318:template <class _Tp, class _Compare, class _Allocator>
+        -: 2319:template <class _NodeHandle>
+        -: 2320:_LIBCPP_INLINE_VISIBILITY
+        -: 2321:_NodeHandle
+        -: 2322:__tree<_Tp, _Compare, _Allocator>::__node_handle_extract(key_type const& __key)
+        -: 2323:{
+        -: 2324:    iterator __it = find(__key);
+        -: 2325:    if (__it == end())
+        -: 2326:        return _NodeHandle();
+        -: 2327:    return __node_handle_extract<_NodeHandle>(__it);
+        -: 2328:}
+        -: 2329:
+        -: 2330:template <class _Tp, class _Compare, class _Allocator>
+        -: 2331:template <class _NodeHandle>
+        -: 2332:_LIBCPP_INLINE_VISIBILITY
+        -: 2333:_NodeHandle
+        -: 2334:__tree<_Tp, _Compare, _Allocator>::__node_handle_extract(const_iterator __p)
+        -: 2335:{
+        -: 2336:    __node_pointer __np = __p.__get_np();
+        -: 2337:    __remove_node_pointer(__np);
+        -: 2338:    return _NodeHandle(__np, __alloc());
+        -: 2339:}
+        -: 2340:
+        -: 2341:template <class _Tp, class _Compare, class _Allocator>
+        -: 2342:template <class _Tree>
+        -: 2343:_LIBCPP_INLINE_VISIBILITY
+        -: 2344:void
+        -: 2345:__tree<_Tp, _Compare, _Allocator>::__node_handle_merge_unique(_Tree& __source)
+        -: 2346:{
+        -: 2347:    static_assert(is_same<typename _Tree::__node_pointer, __node_pointer>::value, "");
+        -: 2348:
+        -: 2349:    for (typename _Tree::iterator __i = __source.begin();
+        -: 2350:         __i != __source.end();)
+        -: 2351:    {
+        -: 2352:        __node_pointer __src_ptr = __i.__get_np();
+        -: 2353:        __parent_pointer __parent;
+        -: 2354:        __node_base_pointer& __child =
+        -: 2355:            __find_equal(__parent, _NodeTypes::__get_key(__src_ptr->__value_));
+        -: 2356:        ++__i;
+        -: 2357:        if (__child != nullptr)
+        -: 2358:            continue;
+        -: 2359:        __source.__remove_node_pointer(__src_ptr);
+        -: 2360:        __insert_node_at(__parent, __child,
+        -: 2361:                         static_cast<__node_base_pointer>(__src_ptr));
+        -: 2362:    }
+        -: 2363:}
+        -: 2364:
+        -: 2365:template <class _Tp, class _Compare, class _Allocator>
+        -: 2366:template <class _NodeHandle>
+        -: 2367:_LIBCPP_INLINE_VISIBILITY
+        -: 2368:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2369:__tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(_NodeHandle&& __nh)
+        -: 2370:{
+        -: 2371:    if (__nh.empty())
+        -: 2372:        return end();
+        -: 2373:    __node_pointer __ptr = __nh.__ptr_;
+        -: 2374:    __parent_pointer __parent;
+        -: 2375:    __node_base_pointer& __child = __find_leaf_high(
+        -: 2376:        __parent, _NodeTypes::__get_key(__ptr->__value_));
+        -: 2377:    __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__ptr));
+        -: 2378:    __nh.__release_ptr();
+        -: 2379:    return iterator(__ptr);
+        -: 2380:}
+        -: 2381:
+        -: 2382:template <class _Tp, class _Compare, class _Allocator>
+        -: 2383:template <class _NodeHandle>
+        -: 2384:_LIBCPP_INLINE_VISIBILITY
+        -: 2385:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2386:__tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(
+        -: 2387:    const_iterator __hint, _NodeHandle&& __nh)
+        -: 2388:{
+        -: 2389:    if (__nh.empty())
+        -: 2390:        return end();
+        -: 2391:
+        -: 2392:    __node_pointer __ptr = __nh.__ptr_;
+        -: 2393:    __parent_pointer __parent;
+        -: 2394:    __node_base_pointer& __child = __find_leaf(__hint, __parent,
+        -: 2395:                                               _NodeTypes::__get_key(__ptr->__value_));
+        -: 2396:    __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__ptr));
+        -: 2397:    __nh.__release_ptr();
+        -: 2398:    return iterator(__ptr);
+        -: 2399:}
+        -: 2400:
+        -: 2401:template <class _Tp, class _Compare, class _Allocator>
+        -: 2402:template <class _Tree>
+        -: 2403:_LIBCPP_INLINE_VISIBILITY
+        -: 2404:void
+        -: 2405:__tree<_Tp, _Compare, _Allocator>::__node_handle_merge_multi(_Tree& __source)
+        -: 2406:{
+        -: 2407:    static_assert(is_same<typename _Tree::__node_pointer, __node_pointer>::value, "");
+        -: 2408:
+        -: 2409:    for (typename _Tree::iterator __i = __source.begin();
+        -: 2410:         __i != __source.end();)
+        -: 2411:    {
+        -: 2412:        __node_pointer __src_ptr = __i.__get_np();
+        -: 2413:        __parent_pointer __parent;
+        -: 2414:        __node_base_pointer& __child = __find_leaf_high(
+        -: 2415:            __parent, _NodeTypes::__get_key(__src_ptr->__value_));
+        -: 2416:        ++__i;
+        -: 2417:        __source.__remove_node_pointer(__src_ptr);
+        -: 2418:        __insert_node_at(__parent, __child,
+        -: 2419:                         static_cast<__node_base_pointer>(__src_ptr));
+        -: 2420:    }
+        -: 2421:}
+        -: 2422:
+        -: 2423:#endif // _LIBCPP_STD_VER >= 17
+        -: 2424:
+        -: 2425:template <class _Tp, class _Compare, class _Allocator>
+        -: 2426:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2427:__tree<_Tp, _Compare, _Allocator>::erase(const_iterator __p)
+        -: 2428:{
+        -: 2429:    __node_pointer __np = __p.__get_np();
+        -: 2430:    iterator __r = __remove_node_pointer(__np);
+        -: 2431:    __node_allocator& __na = __node_alloc();
+        -: 2432:    __node_traits::destroy(__na, _NodeTypes::__get_ptr(
+        -: 2433:        const_cast<__node_value_type&>(*__p)));
+        -: 2434:    __node_traits::deallocate(__na, __np, 1);
+        -: 2435:    return __r;
+        -: 2436:}
+        -: 2437:
+        -: 2438:template <class _Tp, class _Compare, class _Allocator>
+        -: 2439:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2440:__tree<_Tp, _Compare, _Allocator>::erase(const_iterator __f, const_iterator __l)
+        -: 2441:{
+        -: 2442:    while (__f != __l)
+        -: 2443:        __f = erase(__f);
+        -: 2444:    return iterator(__l.__ptr_);
+        -: 2445:}
+        -: 2446:
+        -: 2447:template <class _Tp, class _Compare, class _Allocator>
+        -: 2448:template <class _Key>
+        -: 2449:typename __tree<_Tp, _Compare, _Allocator>::size_type
+        -: 2450:__tree<_Tp, _Compare, _Allocator>::__erase_unique(const _Key& __k)
+        -: 2451:{
+        -: 2452:    iterator __i = find(__k);
+        -: 2453:    if (__i == end())
+        -: 2454:        return 0;
+        -: 2455:    erase(__i);
+        -: 2456:    return 1;
+        -: 2457:}
+        -: 2458:
+        -: 2459:template <class _Tp, class _Compare, class _Allocator>
+        -: 2460:template <class _Key>
+        -: 2461:typename __tree<_Tp, _Compare, _Allocator>::size_type
+        -: 2462:__tree<_Tp, _Compare, _Allocator>::__erase_multi(const _Key& __k)
+        -: 2463:{
+        -: 2464:    pair<iterator, iterator> __p = __equal_range_multi(__k);
+        -: 2465:    size_type __r = 0;
+        -: 2466:    for (; __p.first != __p.second; ++__r)
+        -: 2467:        __p.first = erase(__p.first);
+        -: 2468:    return __r;
+        -: 2469:}
+        -: 2470:
+        -: 2471:template <class _Tp, class _Compare, class _Allocator>
+        -: 2472:template <class _Key>
+        -: 2473:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2474:__tree<_Tp, _Compare, _Allocator>::find(const _Key& __v)
+        -: 2475:{
+        -: 2476:    iterator __p = __lower_bound(__v, __root(), __end_node());
+        -: 2477:    if (__p != end() && !value_comp()(__v, *__p))
+        -: 2478:        return __p;
+        -: 2479:    return end();
+        -: 2480:}
+        -: 2481:
+        -: 2482:template <class _Tp, class _Compare, class _Allocator>
+        -: 2483:template <class _Key>
+        -: 2484:typename __tree<_Tp, _Compare, _Allocator>::const_iterator
+function _ZNKSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE4findIS7_EENS_21__tree_const_iteratorIS8_PNS_11__tree_nodeIS8_PvEElEERKT_ called 0 returned 0% blocks executed 0%
+    #####: 2485:__tree<_Tp, _Compare, _Allocator>::find(const _Key& __v) const
+        -: 2486:{
+    #####: 2487:    const_iterator __p = __lower_bound(__v, __root(), __end_node());
+    #####: 2488:    if (__p != end() && !value_comp()(__v, *__p))
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####: 2489:        return __p;
+    #####: 2490:    return end();
+    #####: 2491:}
+        -: 2492:
+        -: 2493:template <class _Tp, class _Compare, class _Allocator>
+        -: 2494:template <class _Key>
+        -: 2495:typename __tree<_Tp, _Compare, _Allocator>::size_type
+        -: 2496:__tree<_Tp, _Compare, _Allocator>::__count_unique(const _Key& __k) const
+        -: 2497:{
+        -: 2498:    __node_pointer __rt = __root();
+        -: 2499:    while (__rt != nullptr)
+        -: 2500:    {
+        -: 2501:        if (value_comp()(__k, __rt->__value_))
+        -: 2502:        {
+        -: 2503:            __rt = static_cast<__node_pointer>(__rt->__left_);
+        -: 2504:        }
+        -: 2505:        else if (value_comp()(__rt->__value_, __k))
+        -: 2506:            __rt = static_cast<__node_pointer>(__rt->__right_);
+        -: 2507:        else
+        -: 2508:            return 1;
+        -: 2509:    }
+        -: 2510:    return 0;
+        -: 2511:}
+        -: 2512:
+        -: 2513:template <class _Tp, class _Compare, class _Allocator>
+        -: 2514:template <class _Key>
+        -: 2515:typename __tree<_Tp, _Compare, _Allocator>::size_type
+        -: 2516:__tree<_Tp, _Compare, _Allocator>::__count_multi(const _Key& __k) const
+        -: 2517:{
+        -: 2518:    __iter_pointer __result = __end_node();
+        -: 2519:    __node_pointer __rt = __root();
+        -: 2520:    while (__rt != nullptr)
+        -: 2521:    {
+        -: 2522:        if (value_comp()(__k, __rt->__value_))
+        -: 2523:        {
+        -: 2524:            __result = static_cast<__iter_pointer>(__rt);
+        -: 2525:            __rt = static_cast<__node_pointer>(__rt->__left_);
+        -: 2526:        }
+        -: 2527:        else if (value_comp()(__rt->__value_, __k))
+        -: 2528:            __rt = static_cast<__node_pointer>(__rt->__right_);
+        -: 2529:        else
+        -: 2530:            return _VSTD::distance(
+        -: 2531:                __lower_bound(__k, static_cast<__node_pointer>(__rt->__left_), static_cast<__iter_pointer>(__rt)),
+        -: 2532:                __upper_bound(__k, static_cast<__node_pointer>(__rt->__right_), __result)
+        -: 2533:            );
+        -: 2534:    }
+        -: 2535:    return 0;
+        -: 2536:}
+        -: 2537:
+        -: 2538:template <class _Tp, class _Compare, class _Allocator>
+        -: 2539:template <class _Key>
+        -: 2540:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2541:__tree<_Tp, _Compare, _Allocator>::__lower_bound(const _Key& __v,
+        -: 2542:                                                 __node_pointer __root,
+        -: 2543:                                                 __iter_pointer __result)
+        -: 2544:{
+        -: 2545:    while (__root != nullptr)
+        -: 2546:    {
+        -: 2547:        if (!value_comp()(__root->__value_, __v))
+        -: 2548:        {
+        -: 2549:            __result = static_cast<__iter_pointer>(__root);
+        -: 2550:            __root = static_cast<__node_pointer>(__root->__left_);
+        -: 2551:        }
+        -: 2552:        else
+        -: 2553:            __root = static_cast<__node_pointer>(__root->__right_);
+        -: 2554:    }
+        -: 2555:    return iterator(__result);
+        -: 2556:}
+        -: 2557:
+        -: 2558:template <class _Tp, class _Compare, class _Allocator>
+        -: 2559:template <class _Key>
+        -: 2560:typename __tree<_Tp, _Compare, _Allocator>::const_iterator
+function _ZNKSt3__16__treeINS_12__value_typeINS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_EENS_19__map_value_compareIS7_S8_NS_4lessIS7_EELb1EEENS5_IS8_EEE13__lower_boundIS7_EENS_21__tree_const_iteratorIS8_PNS_11__tree_nodeIS8_PvEElEERKT_SK_PNS_15__tree_end_nodeIPNS_16__tree_node_baseISI_EEEE called 0 returned 0% blocks executed 0%
+    #####: 2561:__tree<_Tp, _Compare, _Allocator>::__lower_bound(const _Key& __v,
+        -: 2562:                                                 __node_pointer __root,
+        -: 2563:                                                 __iter_pointer __result) const
+        -: 2564:{
+    #####: 2565:    while (__root != nullptr)
+branch  0 never executed
+branch  1 never executed
+        -: 2566:    {
+    #####: 2567:        if (!value_comp()(__root->__value_, __v))
+branch  0 never executed
+branch  1 never executed
+        -: 2568:        {
+    #####: 2569:            __result = static_cast<__iter_pointer>(__root);
+    #####: 2570:            __root = static_cast<__node_pointer>(__root->__left_);
+    #####: 2571:        }
+        -: 2572:        else
+    #####: 2573:            __root = static_cast<__node_pointer>(__root->__right_);
+        -: 2574:    }
+    #####: 2575:    return const_iterator(__result);
+        -: 2576:}
+        -: 2577:
+        -: 2578:template <class _Tp, class _Compare, class _Allocator>
+        -: 2579:template <class _Key>
+        -: 2580:typename __tree<_Tp, _Compare, _Allocator>::iterator
+        -: 2581:__tree<_Tp, _Compare, _Allocator>::__upper_bound(const _Key& __v,
+        -: 2582:                                                 __node_pointer __root,
+        -: 2583:                                                 __iter_pointer __result)
+        -: 2584:{
+        -: 2585:    while (__root != nullptr)
+        -: 2586:    {
+        -: 2587:        if (value_comp()(__v, __root->__value_))
+        -: 2588:        {
+        -: 2589:            __result = static_cast<__iter_pointer>(__root);
+        -: 2590:            __root = static_cast<__node_pointer>(__root->__left_);
+        -: 2591:        }
+        -: 2592:        else
+        -: 2593:            __root = static_cast<__node_pointer>(__root->__right_);
+        -: 2594:    }
+        -: 2595:    return iterator(__result);
+        -: 2596:}
+        -: 2597:
+        -: 2598:template <class _Tp, class _Compare, class _Allocator>
+        -: 2599:template <class _Key>
+        -: 2600:typename __tree<_Tp, _Compare, _Allocator>::const_iterator
+        -: 2601:__tree<_Tp, _Compare, _Allocator>::__upper_bound(const _Key& __v,
+        -: 2602:                                                 __node_pointer __root,
+        -: 2603:                                                 __iter_pointer __result) const
+        -: 2604:{
+        -: 2605:    while (__root != nullptr)
+        -: 2606:    {
+        -: 2607:        if (value_comp()(__v, __root->__value_))
+        -: 2608:        {
+        -: 2609:            __result = static_cast<__iter_pointer>(__root);
+        -: 2610:            __root = static_cast<__node_pointer>(__root->__left_);
+        -: 2611:        }
+        -: 2612:        else
+        -: 2613:            __root = static_cast<__node_pointer>(__root->__right_);
+        -: 2614:    }
+        -: 2615:    return const_iterator(__result);
+        -: 2616:}
+        -: 2617:
+        -: 2618:template <class _Tp, class _Compare, class _Allocator>
+        -: 2619:template <class _Key>
+        -: 2620:pair<typename __tree<_Tp, _Compare, _Allocator>::iterator,
+        -: 2621:     typename __tree<_Tp, _Compare, _Allocator>::iterator>
+        -: 2622:__tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const _Key& __k)
+        -: 2623:{
+        -: 2624:    typedef pair<iterator, iterator> _Pp;
+        -: 2625:    __iter_pointer __result = __end_node();
+        -: 2626:    __node_pointer __rt = __root();
+        -: 2627:    while (__rt != nullptr)
+        -: 2628:    {
+        -: 2629:        if (value_comp()(__k, __rt->__value_))
+        -: 2630:        {
+        -: 2631:            __result = static_cast<__iter_pointer>(__rt);
+        -: 2632:            __rt = static_cast<__node_pointer>(__rt->__left_);
+        -: 2633:        }
+        -: 2634:        else if (value_comp()(__rt->__value_, __k))
+        -: 2635:            __rt = static_cast<__node_pointer>(__rt->__right_);
+        -: 2636:        else
+        -: 2637:            return _Pp(iterator(__rt),
+        -: 2638:                      iterator(
+        -: 2639:                          __rt->__right_ != nullptr ?
+        -: 2640:                              static_cast<__iter_pointer>(_VSTD::__tree_min(__rt->__right_))
+        -: 2641:                            : __result));
+        -: 2642:    }
+        -: 2643:    return _Pp(iterator(__result), iterator(__result));
+        -: 2644:}
+        -: 2645:
+        -: 2646:template <class _Tp, class _Compare, class _Allocator>
+        -: 2647:template <class _Key>
+        -: 2648:pair<typename __tree<_Tp, _Compare, _Allocator>::const_iterator,
+        -: 2649:     typename __tree<_Tp, _Compare, _Allocator>::const_iterator>
+        -: 2650:__tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const _Key& __k) const
+        -: 2651:{
+        -: 2652:    typedef pair<const_iterator, const_iterator> _Pp;
+        -: 2653:    __iter_pointer __result = __end_node();
+        -: 2654:    __node_pointer __rt = __root();
+        -: 2655:    while (__rt != nullptr)
+        -: 2656:    {
+        -: 2657:        if (value_comp()(__k, __rt->__value_))
+        -: 2658:        {
+        -: 2659:            __result = static_cast<__iter_pointer>(__rt);
+        -: 2660:            __rt = static_cast<__node_pointer>(__rt->__left_);
+        -: 2661:        }
+        -: 2662:        else if (value_comp()(__rt->__value_, __k))
+        -: 2663:            __rt = static_cast<__node_pointer>(__rt->__right_);
+        -: 2664:        else
+        -: 2665:            return _Pp(const_iterator(__rt),
+        -: 2666:                      const_iterator(
+        -: 2667:                          __rt->__right_ != nullptr ?
+        -: 2668:                              static_cast<__iter_pointer>(_VSTD::__tree_min(__rt->__right_))
+        -: 2669:                            : __result));
+        -: 2670:    }
+        -: 2671:    return _Pp(const_iterator(__result), const_iterator(__result));
+        -: 2672:}
+        -: 2673:
+        -: 2674:template <class _Tp, class _Compare, class _Allocator>
+        -: 2675:template <class _Key>
+        -: 2676:pair<typename __tree<_Tp, _Compare, _Allocator>::iterator,
+        -: 2677:     typename __tree<_Tp, _Compare, _Allocator>::iterator>
+        -: 2678:__tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const _Key& __k)
+        -: 2679:{
+        -: 2680:    typedef pair<iterator, iterator> _Pp;
+        -: 2681:    __iter_pointer __result = __end_node();
+        -: 2682:    __node_pointer __rt = __root();
+        -: 2683:    while (__rt != nullptr)
+        -: 2684:    {
+        -: 2685:        if (value_comp()(__k, __rt->__value_))
+        -: 2686:        {
+        -: 2687:            __result = static_cast<__iter_pointer>(__rt);
+        -: 2688:            __rt = static_cast<__node_pointer>(__rt->__left_);
+        -: 2689:        }
+        -: 2690:        else if (value_comp()(__rt->__value_, __k))
+        -: 2691:            __rt = static_cast<__node_pointer>(__rt->__right_);
+        -: 2692:        else
+        -: 2693:            return _Pp(__lower_bound(__k, static_cast<__node_pointer>(__rt->__left_), static_cast<__iter_pointer>(__rt)),
+        -: 2694:                      __upper_bound(__k, static_cast<__node_pointer>(__rt->__right_), __result));
+        -: 2695:    }
+        -: 2696:    return _Pp(iterator(__result), iterator(__result));
+        -: 2697:}
+        -: 2698:
+        -: 2699:template <class _Tp, class _Compare, class _Allocator>
+        -: 2700:template <class _Key>
+        -: 2701:pair<typename __tree<_Tp, _Compare, _Allocator>::const_iterator,
+        -: 2702:     typename __tree<_Tp, _Compare, _Allocator>::const_iterator>
+        -: 2703:__tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const _Key& __k) const
+        -: 2704:{
+        -: 2705:    typedef pair<const_iterator, const_iterator> _Pp;
+        -: 2706:    __iter_pointer __result = __end_node();
+        -: 2707:    __node_pointer __rt = __root();
+        -: 2708:    while (__rt != nullptr)
+        -: 2709:    {
+        -: 2710:        if (value_comp()(__k, __rt->__value_))
+        -: 2711:        {
+        -: 2712:            __result = static_cast<__iter_pointer>(__rt);
+        -: 2713:            __rt = static_cast<__node_pointer>(__rt->__left_);
+        -: 2714:        }
+        -: 2715:        else if (value_comp()(__rt->__value_, __k))
+        -: 2716:            __rt = static_cast<__node_pointer>(__rt->__right_);
+        -: 2717:        else
+        -: 2718:            return _Pp(__lower_bound(__k, static_cast<__node_pointer>(__rt->__left_), static_cast<__iter_pointer>(__rt)),
+        -: 2719:                      __upper_bound(__k, static_cast<__node_pointer>(__rt->__right_), __result));
+        -: 2720:    }
+        -: 2721:    return _Pp(const_iterator(__result), const_iterator(__result));
+        -: 2722:}
+        -: 2723:
+        -: 2724:template <class _Tp, class _Compare, class _Allocator>
+        -: 2725:typename __tree<_Tp, _Compare, _Allocator>::__node_holder
+        -: 2726:__tree<_Tp, _Compare, _Allocator>::remove(const_iterator __p) _NOEXCEPT
+        -: 2727:{
+        -: 2728:    __node_pointer __np = __p.__get_np();
+        -: 2729:    if (__begin_node() == __p.__ptr_)
+        -: 2730:    {
+        -: 2731:        if (__np->__right_ != nullptr)
+        -: 2732:            __begin_node() = static_cast<__iter_pointer>(__np->__right_);
+        -: 2733:        else
+        -: 2734:            __begin_node() = static_cast<__iter_pointer>(__np->__parent_);
+        -: 2735:    }
+        -: 2736:    --size();
+        -: 2737:    _VSTD::__tree_remove(__end_node()->__left_,
+        -: 2738:                         static_cast<__node_base_pointer>(__np));
+        -: 2739:    return __node_holder(__np, _Dp(__node_alloc(), true));
+        -: 2740:}
+        -: 2741:
+        -: 2742:template <class _Tp, class _Compare, class _Allocator>
+        -: 2743:inline _LIBCPP_INLINE_VISIBILITY
+        -: 2744:void
+        -: 2745:swap(__tree<_Tp, _Compare, _Allocator>& __x,
+        -: 2746:     __tree<_Tp, _Compare, _Allocator>& __y)
+        -: 2747:    _NOEXCEPT_(_NOEXCEPT_(__x.swap(__y)))
+        -: 2748:{
+        -: 2749:    __x.swap(__y);
+        -: 2750:}
+        -: 2751:
+        -: 2752:_LIBCPP_END_NAMESPACE_STD
+        -: 2753:
+        -: 2754:_LIBCPP_POP_MACROS
+        -: 2755:
+        -: 2756:#endif // _LIBCPP___TREE

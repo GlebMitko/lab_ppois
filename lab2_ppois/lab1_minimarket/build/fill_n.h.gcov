@@ -1,0 +1,53 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/fill_n.h
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1://===----------------------------------------------------------------------===//
+        -:    2://
+        -:    3:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    4:// See https://llvm.org/LICENSE.txt for license information.
+        -:    5:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    6://
+        -:    7://===----------------------------------------------------------------------===//
+        -:    8:
+        -:    9:#ifndef _LIBCPP___ALGORITHM_FILL_N_H
+        -:   10:#define _LIBCPP___ALGORITHM_FILL_N_H
+        -:   11:
+        -:   12:#include <__config>
+        -:   13:#include <__iterator/iterator_traits.h>
+        -:   14:#include <__utility/convert_to_integral.h>
+        -:   15:
+        -:   16:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   17:#  pragma GCC system_header
+        -:   18:#endif
+        -:   19:
+        -:   20:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   21:
+        -:   22:// fill_n isn't specialized for std::memset, because the compiler already optimizes the loop to a call to std::memset.
+        -:   23:
+        -:   24:template <class _OutputIterator, class _Size, class _Tp>
+        -:   25:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX20
+        -:   26:_OutputIterator
+function _ZNSt3__18__fill_nB8ue170006IPcmcEET_S2_T0_RKT1_ called 0 returned 0% blocks executed 0%
+    #####:   27:__fill_n(_OutputIterator __first, _Size __n, const _Tp& __value)
+        -:   28:{
+    #####:   29:    for (; __n > 0; ++__first, (void) --__n)
+branch  0 never executed
+branch  1 never executed
+    #####:   30:        *__first = __value;
+    #####:   31:    return __first;
+        -:   32:}
+        -:   33:
+        -:   34:template <class _OutputIterator, class _Size, class _Tp>
+        -:   35:inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX20
+        -:   36:_OutputIterator
+function _ZNSt3__16fill_nB8ue170006IPcmcEET_S2_T0_RKT1_ called 0 returned 0% blocks executed 0%
+    #####:   37:fill_n(_OutputIterator __first, _Size __n, const _Tp& __value)
+        -:   38:{
+    #####:   39:   return _VSTD::__fill_n(__first, _VSTD::__convert_to_integral(__n), __value);
+        -:   40:}
+        -:   41:
+        -:   42:_LIBCPP_END_NAMESPACE_STD
+        -:   43:
+        -:   44:#endif // _LIBCPP___ALGORITHM_FILL_N_H

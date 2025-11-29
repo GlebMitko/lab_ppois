@@ -1,0 +1,128 @@
+        -:    0:Source:/Users/glebmitko/Desktop/lab1_minimarket/src/orders/../../include/orders/OrderSystem.hpp
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/orders/OrderSystem.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/orders/OrderSystem.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#pragma once
+        -:    2:#include <string>
+        -:    3:#include <vector>
+        -:    4:#include <memory>
+        -:    5:#include <ctime>
+        -:    6:#include <map>
+        -:    7:#include "../utils/Exceptions.hpp"
+        -:    8:
+        -:    9:namespace minimarket {
+        -:   10:namespace orders {
+        -:   11:
+        -:   12:// 1. Базовый класс заказа
+        -:   13:class Order {
+        -:   14:private:
+        -:   15:    std::string orderId;
+        -:   16:    std::string customerId;
+        -:   17:    std::time_t orderDate;
+        -:   18:    double totalAmount;
+        -:   19:public:
+        -:   20:    Order(const std::string& id, const std::string& custId, double amount);
+        -:   21:    
+        -:   22:    // Добавляем геттеры
+        -:   23:    std::string getOrderId() const { return orderId; }
+        -:   24:    std::string getCustomerId() const { return customerId; }
+        -:   25:    double getTotalAmount() const { return totalAmount; }
+        -:   26:    
+        -:   27:    bool validateOrder() const;
+        -:   28:    double calculateTax() const;
+        -:   29:    std::string generateOrderSummary() const;
+        -:   30:};
+        -:   31:
+        -:   32:// 2. Элемент заказа
+        -:   33:class OrderItem {
+        -:   34:private:
+        -:   35:    std::string productId;
+        -:   36:    std::string productName;
+        -:   37:    int quantity;
+        -:   38:    double unitPrice;
+        -:   39:public:
+        -:   40:    OrderItem(const std::string& prodId, const std::string& name, int qty, double price);
+        -:   41:    
+        -:   42:    // Добавляем геттеры
+function _ZNK10minimarket6orders9OrderItem12getProductIdEv called 0 returned 0% blocks executed 0%
+    #####:   43:    std::string getProductId() const { return productId; }
+function _ZNK10minimarket6orders9OrderItem14getProductNameEv called 0 returned 0% blocks executed 0%
+    #####:   44:    std::string getProductName() const { return productName; }
+function _ZNK10minimarket6orders9OrderItem11getQuantityEv called 0 returned 0% blocks executed 0%
+    #####:   45:    int getQuantity() const { return quantity; }
+        -:   46:    double getUnitPrice() const { return unitPrice; }
+        -:   47:    
+        -:   48:    double calculateItemTotal() const;
+        -:   49:    bool validateQuantity() const;
+        -:   50:    bool applyQuantityDiscount();
+        -:   51:};
+        -:   52:
+        -:   53:// 3. Платежная информация
+        -:   54:class Payment {
+        -:   55:private:
+        -:   56:    std::string paymentId;
+        -:   57:    std::string orderId;
+        -:   58:    double amount;
+        -:   59:    std::string paymentMethod;
+        -:   60:    std::string status;
+        -:   61:public:
+        -:   62:    Payment(const std::string& payId, const std::string& ordId, double amt, const std::string& method);
+        -:   63:    
+        -:   64:    // Добавляем геттеры
+        -:   65:    std::string getPaymentId() const { return paymentId; }
+        -:   66:    std::string getOrderId() const { return orderId; }
+        -:   67:    double getAmount() const { return amount; }
+        -:   68:    std::string getPaymentMethod() const { return paymentMethod; }
+        -:   69:    std::string getStatus() const { return status; }
+        -:   70:    
+        -:   71:    bool processPayment();
+        -:   72:    bool verifyPayment() const;
+        -:   73:    std::string generatePaymentConfirmation() const;
+        -:   74:};
+        -:   75:
+        -:   76:// 4. Доставка
+        -:   77:class Shipping {
+        -:   78:private:
+        -:   79:    std::string shippingId;
+        -:   80:    std::string orderId;
+        -:   81:    std::string address;
+        -:   82:    std::string shippingMethod;
+        -:   83:    std::time_t estimatedDelivery;
+        -:   84:public:
+        -:   85:    Shipping(const std::string& shipId, const std::string& ordId,
+        -:   86:             const std::string& addr, const std::string& method);
+        -:   87:    
+        -:   88:    // Добавляем геттеры
+        -:   89:    std::string getShippingId() const { return shippingId; }
+        -:   90:    std::string getOrderId() const { return orderId; }
+        -:   91:    std::string getAddress() const { return address; }
+        -:   92:    std::string getShippingMethod() const { return shippingMethod; }
+        -:   93:    
+        -:   94:    bool scheduleDelivery();
+        -:   95:    int calculateShippingDays() const;
+        -:   96:    bool validateShippingAddress() const;
+        -:   97:};
+        -:   98:
+        -:   99:// 5. Корзина покупок
+        -:  100:class ShoppingCart {
+        -:  101:private:
+        -:  102:    std::string cartId;
+        -:  103:    std::string customerId;
+        -:  104:    std::vector<std::shared_ptr<OrderItem>> items;
+        -:  105:public:
+        -:  106:    ShoppingCart(const std::string& id, const std::string& custId);
+        -:  107:    
+        -:  108:    // Добавляем геттеры
+        -:  109:    std::string getCartId() const { return cartId; }
+        -:  110:    std::string getCustomerId() const { return customerId; }
+        -:  111:    
+        -:  112:    bool addItem(const std::shared_ptr<OrderItem>& item);
+        -:  113:    bool removeItem(const std::string& productId);
+        -:  114:    double calculateCartTotal() const;
+        -:  115:    bool applyCartDiscount(double discountPercent);
+        -:  116:    std::vector<std::string> getCartItems() const;
+        -:  117:};
+        -:  118:
+        -:  119:} // namespace orders
+        -:  120:} // namespace minimarket

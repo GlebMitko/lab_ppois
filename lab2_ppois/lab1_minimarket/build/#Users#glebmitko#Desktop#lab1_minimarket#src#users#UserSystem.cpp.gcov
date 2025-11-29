@@ -1,0 +1,439 @@
+        -:    0:Source:/Users/glebmitko/Desktop/lab1_minimarket/src/users/UserSystem.cpp
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "../../include/users/UserSystem.hpp"
+        -:    2:#include "../../include/utils/Exceptions.hpp"
+        -:    3:#include <ctime>
+        -:    4:#include <algorithm>
+        -:    5:#include <cmath>
+        -:    6:
+        -:    7:namespace minimarket {
+        -:    8:namespace users {
+        -:    9:
+        -:   10:// 1. User implementation
+function _ZN10minimarket5users4UserC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_ called 46 returned 100% blocks executed 70%
+function _ZN10minimarket5users4UserC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_ called 6 returned 100% blocks executed 100%
+       52:   11:User::User(const std::string& id, const std::string& name, const std::string& userEmail)
+       52:   12:    : userId(id), username(name), email(userEmail) {
+branch  0 taken 46
+branch  1 taken 0
+branch  2 taken 46
+branch  3 taken 0
+       46:   13:    if (id.empty() || name.empty()) {
+branch  0 taken 44
+branch  1 taken 2
+        2:   14:        throw exceptions::DataValidationException("User ID and name cannot be empty");
+branch  0 taken 2
+branch  1 taken 0
+branch  2 taken 2
+branch  3 taken 0
+branch  4 taken 0
+branch  5 taken 2
+branch  6 taken 2
+branch  7 taken 0
+        -:   15:    }
+       54:   16:}
+        -:   17:
+function _ZNK10minimarket5users4User12authenticateERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 14 returned 100% blocks executed 100%
+       14:   18:bool User::authenticate(const std::string& password) const {
+       26:   19:    return password.length() >= 8 &&
+branch  0 taken 12
+branch  1 taken 2
+       12:   20:           password.find_first_of("0123456789") != std::string::npos &&
+branch  0 taken 10
+branch  1 taken 2
+       10:   21:           password.find_first_of("!@#$%") != std::string::npos;
+        -:   22:}
+        -:   23:
+function _ZNK10minimarket5users4User11getUserRoleEv called 8 returned 100% blocks executed 100%
+        8:   24:std::string User::getUserRole() const {
+        8:   25:    return "BaseUser";
+        -:   26:}
+        -:   27:
+function _ZN10minimarket5users4User11updateEmailERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 2 returned 100% blocks executed 80%
+        2:   28:bool User::updateEmail(const std::string& newEmail) {
+        2:   29:    if (newEmail.empty() || newEmail.find('@') == std::string::npos) return false;
+branch  0 taken 2
+branch  1 taken 0
+branch  2 taken 2
+branch  3 taken 0
+        2:   30:    email = newEmail;
+        2:   31:    return true;
+        2:   32:}
+        -:   33:
+        -:   34:// 2. Customer implementation
+function _ZN10minimarket5users8CustomerC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_ called 14 returned 100% blocks executed 40%
+function _ZN10minimarket5users8CustomerC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_ called 14 returned 100% blocks executed 100%
+       28:   35:Customer::Customer(const std::string& id, const std::string& name,
+        -:   36:                   const std::string& email, const std::string& phone)
+       28:   37:    : User(id, name, email), customerId(id), phoneNumber(phone), registrationDate(std::time(nullptr)) {}
+branch  0 taken 14
+branch  1 taken 0
+branch  2 taken 14
+branch  3 taken 0
+branch  4 taken 0
+branch  5 taken 14
+        -:   38:
+function _ZNK10minimarket5users8Customer19validatePhoneNumberEv called 14 returned 100% blocks executed 100%
+       14:   39:bool Customer::validatePhoneNumber() const {
+       24:   40:    return phoneNumber.length() >= 10 &&
+branch  0 taken 4
+branch  1 taken 10
+       10:   41:           phoneNumber.find_first_not_of("0123456789+- ()") == std::string::npos;
+        -:   42:}
+        -:   43:
+function _ZNK10minimarket5users8Customer21calculateLoyaltyYearsEv called 4 returned 100% blocks executed 100%
+        4:   44:int Customer::calculateLoyaltyYears() const {
+        4:   45:    std::time_t now = std::time(nullptr);
+        4:   46:    double secondsDiff = std::difftime(now, registrationDate);
+        4:   47:    return static_cast<int>(secondsDiff / (365.25 * 24 * 60 * 60));
+        -:   48:}
+        -:   49:
+function _ZNK10minimarket5users8Customer18canApplyForPremiumEv called 2 returned 100% blocks executed 66%
+        2:   50:bool Customer::canApplyForPremium() const {
+        2:   51:    return calculateLoyaltyYears() >= 2 && validatePhoneNumber();
+branch  0 taken 2
+branch  1 taken 0
+        -:   52:}
+        -:   53:
+        -:   54:// 3. Employee implementation
+function _ZN10minimarket5users8EmployeeC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_d called 18 returned 100% blocks executed 42%
+function _ZN10minimarket5users8EmployeeC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_d called 18 returned 100% blocks executed 100%
+       36:   55:Employee::Employee(const std::string& id, const std::string& name,
+        -:   56:                   const std::string& email, const std::string& dept, double sal)
+       36:   57:    : User(id, name, email), employeeId(id), department(dept), salary(sal) {}
+branch  0 taken 18
+branch  1 taken 0
+branch  2 taken 0
+branch  3 taken 18
+        -:   58:
+function _ZNK10minimarket5users8Employee22approveLoanApplicationEd called 10 returned 100% blocks executed 100%
+       10:   59:bool Employee::approveLoanApplication(double amount) const {
+       10:   60:    return department == "Loans" && salary > 30000 && amount <= 100000;
+branch  0 taken 8
+branch  1 taken 2
+branch  2 taken 2
+branch  3 taken 6
+        -:   61:}
+        -:   62:
+function _ZNK10minimarket5users8Employee20calculateAnnualBonusEv called 2 returned 100% blocks executed 100%
+        2:   63:double Employee::calculateAnnualBonus() const {
+        2:   64:    return salary * 0.15; // 15% годовой бонус
+        -:   65:}
+        -:   66:
+function _ZNK10minimarket5users8Employee22canAccessSensitiveDataEv called 12 returned 100% blocks executed 100%
+       12:   67:bool Employee::canAccessSensitiveData() const {
+       12:   68:    return department == "HR" || department == "Finance" || department == "IT";
+branch  0 taken 10
+branch  1 taken 2
+branch  2 taken 2
+branch  3 taken 8
+        -:   69:}
+        -:   70:
+        -:   71:// 4. Admin implementation
+function _ZN10minimarket5users5AdminC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_ called 8 returned 100% blocks executed 50%
+function _ZN10minimarket5users5AdminC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_ called 8 returned 100% blocks executed 100%
+       16:   72:Admin::Admin(const std::string& id, const std::string& name,
+        -:   73:             const std::string& email, const std::string& level)
+       16:   74:    : User(id, name, email), adminLevel(level) {}
+branch  0 taken 8
+branch  1 taken 0
+        -:   75:
+function _ZN10minimarket5users5Admin16grantPermissionsERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 4 returned 100% blocks executed 75%
+        4:   76:bool Admin::grantPermissions(const std::string& permission) {
+        4:   77:    if (permission.empty()) return false;
+branch  0 taken 0
+branch  1 taken 4
+        4:   78:    permissions.push_back(permission);
+        4:   79:    return true;
+        4:   80:}
+        -:   81:
+function _ZN10minimarket5users5Admin16revokeUserAccessERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 8 returned 100% blocks executed 100%
+        8:   82:bool Admin::revokeUserAccess(const std::string& targetUserId) {
+        8:   83:    return !targetUserId.empty() && adminLevel == "SuperAdmin";
+branch  0 taken 0
+branch  1 taken 8
+        -:   84:}
+        -:   85:
+function _ZNK10minimarket5users5Admin23canModifySystemSettingsEv called 8 returned 100% blocks executed 100%
+        8:   86:bool Admin::canModifySystemSettings() const {
+        8:   87:    return adminLevel == "SuperAdmin" || adminLevel == "SystemAdmin";
+branch  0 taken 4
+branch  1 taken 4
+        -:   88:}
+        -:   89:
+        -:   90:// 5. UserProfile implementation
+function _ZN10minimarket5users11UserProfileC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_ called 8 returned 100% blocks executed 40%
+function _ZN10minimarket5users11UserProfileC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_ called 8 returned 100% blocks executed 100%
+       16:   91:UserProfile::UserProfile(const std::string& id, const std::string& first,
+        -:   92:                         const std::string& last, const std::string& dob)
+       16:   93:    : userId(id), firstName(first), lastName(last), dateOfBirth(dob) {}
+branch  0 taken 8
+branch  1 taken 0
+branch  2 taken 8
+branch  3 taken 0
+branch  4 taken 0
+branch  5 taken 8
+        -:   94:
+function _ZNK10minimarket5users11UserProfile12calculateAgeEv called 10 returned 100% blocks executed 57%
+       10:   95:int UserProfile::calculateAge() const {
+        -:   96:    // Упрощенный расчет возраста
+       10:   97:    if (dateOfBirth.length() != 10) return 0; // DD/MM/YYYY
+branch  0 taken 0
+branch  1 taken 10
+       10:   98:    int birthYear = std::stoi(dateOfBirth.substr(6, 4));
+branch  0 taken 10
+branch  1 taken 0
+       10:   99:    std::time_t now = std::time(nullptr);
+       10:  100:    std::tm* localTime = std::localtime(&now);
+       10:  101:    int currentYear = localTime->tm_year + 1900;
+       10:  102:    return currentYear - birthYear;
+       10:  103:}
+        -:  104:
+function _ZNK10minimarket5users11UserProfile11getFullNameEv called 2 returned 100% blocks executed 50%
+        2:  105:std::string UserProfile::getFullName() const {
+        2:  106:    return firstName + " " + lastName;
+branch  0 taken 2
+branch  1 taken 0
+    #####:  107:}
+        -:  108:
+function _ZNK10minimarket5users11UserProfile7isAdultEv called 6 returned 100% blocks executed 100%
+        6:  109:bool UserProfile::isAdult() const {
+        6:  110:    return calculateAge() >= 18;
+        -:  111:}
+        -:  112:
+        -:  113:// 6. Address implementation
+function _ZN10minimarket5users7AddressC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_ called 12 returned 100% blocks executed 40%
+function _ZN10minimarket5users7AddressC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_SA_ called 12 returned 100% blocks executed 100%
+       24:  114:Address::Address(const std::string& st, const std::string& ct,
+        -:  115:                 const std::string& postal, const std::string& cntry)
+       24:  116:    : street(st), city(ct), postalCode(postal), country(cntry) {}
+branch  0 taken 12
+branch  1 taken 0
+branch  2 taken 12
+branch  3 taken 0
+branch  4 taken 0
+branch  5 taken 12
+        -:  117:
+function _ZNK10minimarket5users7Address15validateAddressEv called 4 returned 100% blocks executed 100%
+        4:  118:bool Address::validateAddress() const {
+        8:  119:    return !street.empty() && !city.empty() &&
+branch  0 taken 4
+branch  1 taken 0
+branch  2 taken 4
+branch  3 taken 0
+        4:  120:           !postalCode.empty() && !country.empty();
+branch  0 taken 0
+branch  1 taken 4
+        -:  121:}
+        -:  122:
+function _ZNK10minimarket5users7Address19getFormattedAddressEv called 2 returned 100% blocks executed 37%
+        2:  123:std::string Address::getFormattedAddress() const {
+        2:  124:    return street + ", " + city + ", " + postalCode + ", " + country;
+branch  0 taken 2
+branch  1 taken 0
+branch  2 taken 2
+branch  3 taken 0
+branch  4 taken 2
+branch  5 taken 0
+branch  6 taken 2
+branch  7 taken 0
+branch  8 taken 0
+branch  9 taken 2
+    #####:  125:}
+        -:  126:
+function _ZNK10minimarket5users7Address15isInternationalEv called 10 returned 100% blocks executed 100%
+       10:  127:bool Address::isInternational() const {
+       10:  128:    return country != "USA" && country != "United States";
+branch  0 taken 4
+branch  1 taken 6
+        -:  129:}
+        -:  130:
+        -:  131:// 7. ContactInfo implementation
+function _ZN10minimarket5users11ContactInfoC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_ called 12 returned 100% blocks executed 42%
+function _ZN10minimarket5users11ContactInfoC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_ called 12 returned 100% blocks executed 100%
+       24:  132:ContactInfo::ContactInfo(const std::string& phone, const std::string& mail,
+        -:  133:                         const std::string& emergency)
+       24:  134:    : phoneNumber(phone), email(mail), emergencyContact(emergency) {}
+branch  0 taken 12
+branch  1 taken 0
+branch  2 taken 0
+branch  3 taken 12
+        -:  135:
+function _ZNK10minimarket5users11ContactInfo19validateContactInfoEv called 10 returned 100% blocks executed 100%
+       10:  136:bool ContactInfo::validateContactInfo() const {
+       10:  137:    bool validEmail = !email.empty() && email.find('@') != std::string::npos;
+branch  0 taken 0
+branch  1 taken 10
+       10:  138:    bool validPhone = !phoneNumber.empty() && phoneNumber.length() >= 10;
+branch  0 taken 0
+branch  1 taken 10
+       10:  139:    return validEmail && validPhone;
+branch  0 taken 2
+branch  1 taken 8
+        -:  140:}
+        -:  141:
+function _ZNK10minimarket5users11ContactInfo17getPrimaryContactEv called 2 returned 100% blocks executed 75%
+        2:  142:std::string ContactInfo::getPrimaryContact() const {
+        2:  143:    return !phoneNumber.empty() ? phoneNumber : email;
+branch  0 taken 2
+branch  1 taken 0
+        -:  144:}
+        -:  145:
+function _ZNK10minimarket5users11ContactInfo19hasEmergencyContactEv called 4 returned 100% blocks executed 100%
+        4:  146:bool ContactInfo::hasEmergencyContact() const {
+        4:  147:    return !emergencyContact.empty();
+        -:  148:}
+        -:  149:
+        -:  150:// 8. LoginCredentials implementation
+function _ZN10minimarket5users16LoginCredentialsC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 8 returned 100% blocks executed 60%
+function _ZN10minimarket5users16LoginCredentialsC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 8 returned 100% blocks executed 100%
+       24:  151:LoginCredentials::LoginCredentials(const std::string& user, const std::string& password)
+       24:  152:    : username(user), lastLogin(std::time(nullptr)) {
+branch  0 taken 8
+branch  1 taken 0
+branch  2 taken 8
+branch  3 taken 0
+        -:  153:    // Упрощенное "хэширование" - в реальной системе используйте bcrypt/scrypt
+        8:  154:    passwordHash = std::to_string(std::hash<std::string>{}(password));
+branch  0 taken 8
+branch  1 taken 0
+       16:  155:}
+        -:  156:
+function _ZNK10minimarket5users16LoginCredentials14verifyPasswordERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 10 returned 100% blocks executed 100%
+       10:  157:bool LoginCredentials::verifyPassword(const std::string& inputPassword) const {
+       10:  158:    std::string inputHash = std::to_string(std::hash<std::string>{}(inputPassword));
+       10:  159:    return inputHash == passwordHash;
+       10:  160:}
+        -:  161:
+function _ZN10minimarket5users16LoginCredentials14updatePasswordERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 6 returned 100% blocks executed 75%
+        6:  162:void LoginCredentials::updatePassword(const std::string& newPassword) {
+        6:  163:    if (newPassword.length() < 8) {
+branch  0 taken 2
+branch  1 taken 4
+        4:  164:        throw exceptions::InvalidPasswordException("Password must be at least 8 characters");
+branch  0 taken 4
+branch  1 taken 0
+branch  2 taken 4
+branch  3 taken 0
+branch  4 taken 0
+branch  5 taken 4
+branch  6 taken 4
+branch  7 taken 0
+        -:  165:    }
+        2:  166:    passwordHash = std::to_string(std::hash<std::string>{}(newPassword));
+        2:  167:    lastLogin = std::time(nullptr);
+        6:  168:}
+        -:  169:
+function _ZNK10minimarket5users16LoginCredentials17isPasswordExpiredEv called 2 returned 100% blocks executed 100%
+        2:  170:bool LoginCredentials::isPasswordExpired() const {
+        2:  171:    std::time_t now = std::time(nullptr);
+        2:  172:    double daysDiff = std::difftime(now, lastLogin) / (60 * 60 * 24);
+        2:  173:    return daysDiff > 90; // Пароль истекает через 90 дней
+        -:  174:}
+        -:  175:
+        -:  176:// 9. UserSession implementation
+function _ZN10minimarket5users11UserSessionC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 2 returned 100% blocks executed 50%
+function _ZN10minimarket5users11UserSessionC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 2 returned 100% blocks executed 100%
+        4:  177:UserSession::UserSession(const std::string& sessId, const std::string& uid)
+        4:  178:    : sessionId(sessId), userId(uid), startTime(std::time(nullptr)), lastActivity(std::time(nullptr)) {}
+branch  0 taken 2
+branch  1 taken 0
+branch  2 taken 2
+branch  3 taken 0
+branch  4 taken 2
+branch  5 taken 0
+        -:  179:
+function _ZNK10minimarket5users11UserSession14isSessionValidEv called 2 returned 100% blocks executed 100%
+        2:  180:bool UserSession::isSessionValid() const {
+        2:  181:    std::time_t now = std::time(nullptr);
+        2:  182:    double minutesDiff = std::difftime(now, lastActivity) / 60;
+        2:  183:    return minutesDiff < 30; // Сессия действительна 30 минут
+        -:  184:}
+        -:  185:
+function _ZN10minimarket5users11UserSession14refreshSessionEv called 0 returned 0% blocks executed 0%
+    #####:  186:void UserSession::refreshSession() {
+    #####:  187:    lastActivity = std::time(nullptr);
+    #####:  188:}
+        -:  189:
+function _ZNK10minimarket5users11UserSession24calculateSessionDurationEv called 2 returned 100% blocks executed 100%
+        2:  190:int UserSession::calculateSessionDuration() const {
+        2:  191:    return static_cast<int>(std::difftime(lastActivity, startTime) / 60); // в минутах
+        -:  192:}
+        -:  193:
+        -:  194:// 10. UserPreferences implementation
+function _ZN10minimarket5users15UserPreferencesC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 4 returned 100% blocks executed 57%
+function _ZN10minimarket5users15UserPreferencesC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 4 returned 100% blocks executed 100%
+       12:  195:UserPreferences::UserPreferences(const std::string& uid, const std::string& lang)
+       12:  196:    : userId(uid), language(lang) {
+branch  0 taken 4
+branch  1 taken 0
+branch  2 taken 4
+branch  3 taken 0
+        -:  197:    // Настройки по умолчанию
+        4:  198:    preferences["theme"] = "light";
+branch  0 taken 4
+branch  1 taken 0
+branch  2 taken 4
+branch  3 taken 0
+branch  4 taken 4
+branch  5 taken 0
+        4:  199:    preferences["notifications"] = "enabled";
+branch  0 taken 4
+branch  1 taken 0
+branch  2 taken 4
+branch  3 taken 0
+branch  4 taken 4
+branch  5 taken 0
+        4:  200:    preferences["currency"] = "USD";
+branch  0 taken 4
+branch  1 taken 0
+branch  2 taken 4
+branch  3 taken 0
+branch  4 taken 4
+branch  5 taken 0
+        8:  201:}
+        -:  202:
+function _ZN10minimarket5users15UserPreferences13setPreferenceERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 8 returned 100% blocks executed 100%
+        8:  203:bool UserPreferences::setPreference(const std::string& key, const std::string& value) {
+        8:  204:    if (key.empty() || value.empty()) return false;
+branch  0 taken 6
+branch  1 taken 2
+branch  2 taken 2
+branch  3 taken 4
+        4:  205:    preferences[key] = value;
+        4:  206:    return true;
+        8:  207:}
+        -:  208:
+function _ZNK10minimarket5users15UserPreferences13getPreferenceERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 6 returned 100% blocks executed 100%
+        6:  209:std::string UserPreferences::getPreference(const std::string& key) const {
+        6:  210:    auto it = preferences.find(key);
+        6:  211:    return it != preferences.end() ? it->second : "";
+branch  0 taken 4
+branch  1 taken 2
+        -:  212:}
+        -:  213:
+function _ZNK10minimarket5users15UserPreferences16supportsLanguageERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 10 returned 100% blocks executed 45%
+       10:  214:bool UserPreferences::supportsLanguage(const std::string& lang) const {
+       10:  215:    std::vector<std::string> supportedLanguages = {"en", "es", "fr", "de", "ru"};
+branch  0 taken 10
+branch  1 taken 0
+branch  2 taken 10
+branch  3 taken 0
+branch  4 taken 10
+branch  5 taken 0
+branch  6 taken 10
+branch  7 taken 0
+branch  8 taken 10
+branch  9 taken 0
+branch 10 taken 10
+branch 11 taken 0
+       10:  216:    return std::find(supportedLanguages.begin(), supportedLanguages.end(), lang) != supportedLanguages.end();
+branch  0 taken 0
+branch  1 taken 10
+       10:  217:}
+        -:  218:
+        -:  219:} // namespace users
+        -:  220:} // namespace minimarket

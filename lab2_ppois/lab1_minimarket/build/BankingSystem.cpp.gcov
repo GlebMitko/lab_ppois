@@ -1,0 +1,654 @@
+        -:    0:Source:/Users/glebmitko/Desktop/lab1_minimarket/src/banking/BankingSystem.cpp
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/banking/BankingSystem.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/banking/BankingSystem.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "../../include/banking/BankingSystem.hpp"
+        -:    2:#include "../../include/utils/Exceptions.hpp"
+        -:    3:#include <cmath>
+        -:    4:#include <algorithm>
+        -:    5:#include <random>
+        -:    6:
+        -:    7:namespace minimarket {
+        -:    8:namespace banking {
+        -:    9:
+        -:   10:// 1. Balance implementation
+function _ZN10minimarket7banking7BalanceC2EdRKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 8 returned 100% blocks executed 75%
+function _ZN10minimarket7banking7BalanceC1EdRKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 8 returned 100% blocks executed 100%
+       16:   11:Balance::Balance(double amount, const std::string& currency)
+       16:   12:    : availableAmount(amount), reservedAmount(0.0), currencyCode(currency) {
+        8:   13:    if (amount < 0) throw exceptions::InvalidOperationException("Balance cannot be negative");
+branch  0 taken 88%
+branch  1 taken 13%
+branch  2 taken 100%
+branch  3 taken 0%
+branch  4 taken 100%
+branch  5 taken 0%
+branch  6 taken 0%
+branch  7 taken 100%
+branch  8 taken 100%
+branch  9 taken 0%
+       17:   14:}
+        -:   15:
+function _ZN10minimarket7banking7Balance8withdrawEd called 2 returned 100% blocks executed 100%
+        2:   16:bool Balance::withdraw(double amount) {
+        2:   17:    if (amount <= 0 || amount > availableAmount) return false;
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 50%
+branch  3 taken 50%
+        1:   18:    availableAmount -= amount;
+        1:   19:    return true;
+        2:   20:}
+        -:   21:
+function _ZN10minimarket7banking7Balance12reserveFundsEd called 1 returned 100% blocks executed 21%
+        1:   22:void Balance::reserveFunds(double amount) {
+        1:   23:    if (amount <= 0 || amount > availableAmount) {
+branch  0 taken 100%
+branch  1 taken 0%
+    #####:   24:        throw exceptions::InsufficientFundsException("Cannot reserve funds");
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+        -:   25:    }
+        1:   26:    availableAmount -= amount;
+        1:   27:    reservedAmount += amount;
+        1:   28:}
+        -:   29:
+function _ZNK10minimarket7banking7Balance14calculateTotalEv called 4 returned 100% blocks executed 100%
+        4:   30:double Balance::calculateTotal() const {
+        4:   31:    return availableAmount + reservedAmount;
+        -:   32:}
+        -:   33:
+        -:   34:// 2. Transaction implementation
+function _ZN10minimarket7banking11TransactionC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEdSA_ called 2 returned 100% blocks executed 72%
+function _ZN10minimarket7banking11TransactionC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEdSA_ called 2 returned 100% blocks executed 100%
+        4:   35:Transaction::Transaction(const std::string& id, double amt, const std::string& tp)
+        4:   36:    : transactionId(id), amount(amt), type(tp), timestamp(std::time(nullptr)) {
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 100%
+branch  3 taken 0%
+        2:   37:    if (amt <= 0) throw exceptions::InvalidOperationException("Transaction amount must be positive");
+branch  0 taken 50%
+branch  1 taken 50%
+branch  2 taken 100%
+branch  3 taken 0%
+branch  4 taken 100%
+branch  5 taken 0%
+branch  6 taken 0%
+branch  7 taken 100%
+branch  8 taken 100%
+branch  9 taken 0%
+        5:   38:}
+        -:   39:
+function _ZNK10minimarket7banking11Transaction19validateTransactionEv called 1 returned 100% blocks executed 100%
+        1:   40:bool Transaction::validateTransaction() const {
+        1:   41:    return !transactionId.empty() && amount > 0 && !type.empty();
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 0%
+branch  3 taken 100%
+        -:   42:}
+        -:   43:
+function _ZNK10minimarket7banking11Transaction15generateReceiptEv called 1 returned 100% blocks executed 37%
+        1:   44:std::string Transaction::generateReceipt() const {
+        1:   45:    return "Receipt for " + std::to_string(amount) + " - " + type + " - ID: " + transactionId;
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 100%
+branch  3 taken 0%
+branch  4 taken 100%
+branch  5 taken 0%
+branch  6 taken 100%
+branch  7 taken 0%
+branch  8 taken 0%
+branch  9 taken 100%
+    #####:   46:}
+        -:   47:
+        -:   48:// 3. Account implementation
+function _ZN10minimarket7banking7AccountC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 6 returned 100% blocks executed 42%
+function _ZN10minimarket7banking7AccountC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 5 returned 100% blocks executed 100%
+       11:   49:Account::Account(const std::string& number, const std::string& name)
+       11:   50:    : accountNumber(number), holderName(name), balance(std::make_shared<Balance>(0.0)) {}
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 0%
+branch  3 taken 100%
+        -:   51:
+function _ZN10minimarket7banking7Account13transferMoneyEdRS1_ called 0 returned 0% blocks executed 0%
+    #####:   52:bool Account::transferMoney(double amount, Account& target) {
+    #####:   53:    if (!balance->withdraw(amount)) return false;
+branch  0 never executed
+branch  1 never executed
+        -:   54:    // В реальной системе здесь был бы вызов метода target.deposit()
+    #####:   55:    return true;
+    #####:   56:}
+        -:   57:
+function _ZN10minimarket7banking7Account14applyOverdraftEd called 1 returned 100% blocks executed 100%
+        1:   58:bool Account::applyOverdraft(double limit) {
+        1:   59:    return limit > 0; // Упрощенная логика
+        -:   60:}
+        -:   61:
+function _ZNK10minimarket7banking7Account17calculateInterestEv called 2 returned 100% blocks executed 100%
+        2:   62:double Account::calculateInterest() const {
+        2:   63:    return balance->calculateTotal() * 0.02; // 2% годовых
+        -:   64:}
+        -:   65:
+function _ZNK10minimarket7banking7Account19getAvailableBalanceEv called 1 returned 100% blocks executed 75%
+        1:   66:double Account::getAvailableBalance() const {
+        1:   67:    return balance ? balance->getAvailableAmount() : 0.0;
+branch  0 taken 100%
+branch  1 taken 0%
+        -:   68:}
+        -:   69:
+        -:   70:// 4. Card implementation
+function _ZN10minimarket7banking4CardC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_ called 3 returned 100% blocks executed 42%
+function _ZN10minimarket7banking4CardC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_ called 2 returned 100% blocks executed 100%
+        5:   71:Card::Card(const std::string& number, const std::string& name, const std::string& expiry)
+        5:   72:    : cardNumber(number), holderName(name), expiryDate(expiry), pinAttempts(0) {}
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 0%
+branch  3 taken 100%
+        -:   73:
+function _ZN10minimarket7banking4Card9verifyPinERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 2 returned 100% blocks executed 71%
+        2:   74:bool Card::verifyPin(const std::string& pin) {
+        2:   75:    if (pin.length() != 4) return false;
+branch  0 taken 50%
+branch  1 taken 50%
+        5:   76:    for (char c : pin) if (!isdigit(c)) return false;
+branch  0 taken 80%
+branch  1 taken 20%
+branch  2 taken 100%
+branch  3 taken 0%
+        -:   77:    
+        1:   78:    if (pin == "1234") { // Упрощенная проверка
+branch  0 taken 100%
+branch  1 taken 0%
+        1:   79:        pinAttempts = 0;
+        1:   80:        return true;
+        -:   81:    }
+        -:   82:    
+    #####:   83:    pinAttempts++;
+    #####:   84:    if (pinAttempts >= 3) blockCard();
+branch  0 never executed
+branch  1 never executed
+    #####:   85:    return false;
+        2:   86:}
+        -:   87:
+function _ZNK10minimarket7banking4Card14processPaymentEd called 3 returned 100% blocks executed 100%
+        3:   88:bool Card::processPayment(double amount) const {
+        3:   89:    return amount > 0 && amount <= 10000;
+branch  0 taken 0%
+branch  1 taken 100%
+        -:   90:}
+        -:   91:
+function _ZN10minimarket7banking4Card9blockCardEv called 0 returned 0% blocks executed 0%
+    #####:   92:void Card::blockCard() {
+        -:   93:    // Карта блокируется при 3 неудачных попытках PIN
+    #####:   94:}
+        -:   95:
+        -:   96:// 5. Bank implementation
+        -:   97:// Bank implementation
+function _ZN10minimarket7banking4BankC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 1 returned 100% blocks executed 50%
+function _ZN10minimarket7banking4BankC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 1 returned 100% blocks executed 100%
+        2:   98:Bank::Bank(const std::string& code, const std::string& name)
+        2:   99:    : bankCode(code), bankName(name) {}
+branch  0 taken 100%
+branch  1 taken 0%
+        -:  100:
+function _ZNK10minimarket7banking4Bank11getBankCodeEv called 1 returned 100% blocks executed 100%
+        1:  101:std::string Bank::getBankCode() const {
+        1:  102:    return bankCode;
+        -:  103:}
+        -:  104:
+function _ZNK10minimarket7banking4Bank11getBankNameEv called 1 returned 100% blocks executed 100%
+        1:  105:std::string Bank::getBankName() const {
+        1:  106:    return bankName;
+        -:  107:}
+        -:  108:
+function _ZN10minimarket7banking4Bank10addAccountERKNSt3__110shared_ptrINS0_7AccountEEE called 1 returned 100% blocks executed 75%
+        1:  109:bool Bank::addAccount(const std::shared_ptr<Account>& account) {
+        1:  110:    if (!account) return false;
+branch  0 taken 0%
+branch  1 taken 100%
+        1:  111:    accounts.push_back(account);
+        1:  112:    return true;
+        1:  113:}
+        -:  114:
+function _ZN10minimarket7banking4Bank11openAccountERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 1 returned 100% blocks executed 50%
+        1:  115:bool Bank::openAccount(const std::string& holderName) {
+        1:  116:    if (holderName.empty()) return false;
+branch  0 taken 0%
+branch  1 taken 100%
+        1:  117:    std::string accountNumber = "ACC" + std::to_string(accounts.size() + 1);
+branch  0 taken 100%
+branch  1 taken 0%
+        1:  118:    accounts.push_back(std::make_shared<Account>(accountNumber, holderName));
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 0%
+branch  3 taken 100%
+        1:  119:    return true;
+        1:  120:}
+        -:  121:
+function _ZN10minimarket7banking4Bank12closeAccountERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 2 returned 100% blocks executed 100%
+        2:  122:bool Bank::closeAccount(const std::string& accountNumber) {
+        4:  123:    auto it = std::remove_if(accounts.begin(), accounts.end(),
+function _ZZN10minimarket7banking4Bank12closeAccountERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEENK3$_0clINS2_10shared_ptrINS0_7AccountEEEEEDaRKT_ called 3 returned 100% blocks executed 100%
+        5:  124:        [&](const auto& acc) { return acc->getAccountNumber() == accountNumber; });
+        2:  125:    bool found = it != accounts.end();
+        2:  126:    accounts.erase(it, accounts.end());
+        2:  127:    return found;
+        -:  128:}
+        -:  129:
+function _ZNK10minimarket7banking4Bank20calculateTotalAssetsEv called 1 returned 100% blocks executed 100%
+        1:  130:double Bank::calculateTotalAssets() const {
+        1:  131:    double total = 0.0;
+        2:  132:    for (const auto& account : accounts) {
+branch  0 taken 50%
+branch  1 taken 50%
+        1:  133:        total += account->getAvailableBalance();
+        -:  134:    }
+        1:  135:    return total;
+        -:  136:}
+        -:  137:
+function _ZNK10minimarket7banking4Bank21getTotalAccountsCountEv called 1 returned 100% blocks executed 100%
+        1:  138:size_t Bank::getTotalAccountsCount() const {
+        1:  139:    return accounts.size();
+        -:  140:}
+        -:  141:
+        -:  142:// 6. CreditCard implementation
+        -:  143:
+function _ZN10minimarket7banking10CreditCard9useCreditEd called 2 returned 100% blocks executed 100%
+        2:  144:bool CreditCard::useCredit(double amount) {
+        2:  145:    if (amount <= 0 || usedCredit + amount > creditLimit) return false;
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 50%
+branch  3 taken 50%
+        1:  146:    usedCredit += amount;
+        1:  147:    return true;
+        2:  148:}
+        -:  149:
+function _ZNK10minimarket7banking10CreditCard24calculateAvailableCreditEv called 1 returned 100% blocks executed 100%
+        1:  150:double CreditCard::calculateAvailableCredit() const {
+        1:  151:    return creditLimit - usedCredit;
+        -:  152:}
+        -:  153:
+        -:  154:// 7. Loan implementation
+function _ZN10minimarket7banking4LoanC2Eddi called 2 returned 100% blocks executed 100%
+function _ZN10minimarket7banking4LoanC1Eddi called 1 returned 100% blocks executed 100%
+        3:  155:Loan::Loan(double principal, double rate, int term)
+        3:  156:    : principalAmount(principal), interestRate(rate), termMonths(term) {}
+        -:  157:
+function _ZNK10minimarket7banking4Loan23calculateMonthlyPaymentEv called 2 returned 100% blocks executed 100%
+        2:  158:double Loan::calculateMonthlyPayment() const {
+        2:  159:    double monthlyRate = interestRate / 100 / 12;
+        4:  160:    return principalAmount * monthlyRate * pow(1 + monthlyRate, termMonths) /
+        2:  161:           (pow(1 + monthlyRate, termMonths) - 1);
+        -:  162:}
+        -:  163:
+function _ZNK10minimarket7banking4Loan22calculateTotalInterestEv called 1 returned 100% blocks executed 100%
+        1:  164:double Loan::calculateTotalInterest() const {
+        1:  165:    return calculateMonthlyPayment() * termMonths - principalAmount;
+        -:  166:}
+        -:  167:
+        -:  168:// 8. Mortgage implementation
+function _ZN10minimarket7banking8MortgageC2EddiRKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEd called 1 returned 100% blocks executed 100%
+function _ZN10minimarket7banking8MortgageC1EddiRKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEd called 1 returned 100% blocks executed 100%
+        2:  169:Mortgage::Mortgage(double principal, double rate, int term,
+        -:  170:                   const std::string& address, double down)
+        2:  171:    : Loan(principal, rate, term), propertyAddress(address), downPayment(down) {}
+        -:  172:
+function _ZNK10minimarket7banking8Mortgage19validateDownPaymentEv called 1 returned 100% blocks executed 100%
+        1:  173:bool Mortgage::validateDownPayment() const {
+        1:  174:    return downPayment >= getPrincipalAmount() * 0.2; // Минимум 20%
+        -:  175:}
+        -:  176:
+function _ZNK10minimarket7banking8Mortgage12calculateLTVEv called 1 returned 100% blocks executed 100%
+        1:  177:double Mortgage::calculateLTV() const {
+        1:  178:    return (getPrincipalAmount() - downPayment) / getPrincipalAmount() * 100;
+        -:  179:}
+        -:  180:
+        -:  181:// 9. InvestmentAccount implementation
+function _ZN10minimarket7banking17InvestmentAccountC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_d called 1 returned 100% blocks executed 50%
+function _ZN10minimarket7banking17InvestmentAccountC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_SA_d called 1 returned 100% blocks executed 100%
+        2:  182:InvestmentAccount::InvestmentAccount(const std::string& number, const std::string& name,
+        -:  183:                                     const std::string& type, double risk)
+        2:  184:    : Account(number, name), investmentType(type), riskLevel(risk) {}
+branch  0 taken 100%
+branch  1 taken 0%
+        -:  185:
+function _ZNK10minimarket7banking17InvestmentAccount23calculateExpectedReturnEv called 1 returned 100% blocks executed 100%
+        1:  186:double InvestmentAccount::calculateExpectedReturn() const {
+        1:  187:    return calculateInterest() * (1.0 + riskLevel / 10.0);
+        -:  188:}
+        -:  189:
+function _ZN10minimarket7banking17InvestmentAccount18rebalancePortfolioEv called 1 returned 100% blocks executed 100%
+        1:  190:bool InvestmentAccount::rebalancePortfolio() {
+        1:  191:    return riskLevel > 0.5; // Упрощенная логика ребалансировки
+        -:  192:}
+        -:  193:
+        -:  194:// 10. CreditScore implementation
+function _ZN10minimarket7banking11CreditScoreC2Ei called 2 returned 100% blocks executed 100%
+function _ZN10minimarket7banking11CreditScoreC1Ei called 2 returned 100% blocks executed 100%
+        4:  195:CreditScore::CreditScore(int initialScore) : score(initialScore), lastUpdate(std::time(nullptr)) {}
+        -:  196:
+function _ZNK10minimarket7banking11CreditScore14qualifyForLoanEd called 5 returned 100% blocks executed 100%
+        5:  197:bool CreditScore::qualifyForLoan(double amount) const {
+        5:  198:    return score >= 650 && amount <= score * 100; // Упрощенные критерии
+branch  0 taken 0%
+branch  1 taken 100%
+        -:  199:}
+        -:  200:
+function _ZN10minimarket7banking11CreditScore11updateScoreEi called 1 returned 100% blocks executed 100%
+        1:  201:void CreditScore::updateScore(int newScore) {
+        1:  202:    score = newScore;
+        1:  203:    lastUpdate = std::time(nullptr);
+        1:  204:}
+        -:  205:
+        -:  206:// 11. ATM implementation
+function _ZN10minimarket7banking3ATMC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_d called 1 returned 100% blocks executed 50%
+function _ZN10minimarket7banking3ATMC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_d called 1 returned 100% blocks executed 100%
+        2:  207:ATM::ATM(const std::string& id, const std::string& loc, double cash)
+        2:  208:    : atmId(id), location(loc), cashBalance(cash) {}
+branch  0 taken 100%
+branch  1 taken 0%
+        -:  209:
+function _ZN10minimarket7banking3ATM12dispenseCashEd called 2 returned 100% blocks executed 100%
+        2:  210:bool ATM::dispenseCash(double amount) {
+        2:  211:    if (amount <= 0 || amount > cashBalance || amount > 1000) return false;
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 50%
+branch  3 taken 50%
+branch  4 taken 0%
+branch  5 taken 100%
+        1:  212:    cashBalance -= amount;
+        1:  213:    return true;
+        2:  214:}
+        -:  215:
+function _ZN10minimarket7banking3ATM14processDepositEd called 2 returned 100% blocks executed 100%
+        2:  216:bool ATM::processDeposit(double amount) {
+        2:  217:    if (amount <= 0) return false;
+branch  0 taken 50%
+branch  1 taken 50%
+        1:  218:    cashBalance += amount;
+        1:  219:    return true;
+        2:  220:}
+        -:  221:
+        -:  222:// 12. Branch implementation
+        -:  223:
+        -:  224:
+        -:  225:// 13. BankTransfer implementation
+function _ZN10minimarket7banking12BankTransferC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEdSA_SA_ called 1 returned 100% blocks executed 42%
+function _ZN10minimarket7banking12BankTransferC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEdSA_SA_ called 1 returned 100% blocks executed 100%
+        2:  226:BankTransfer::BankTransfer(const std::string& id, double amt,
+        -:  227:                           const std::string& from, const std::string& to)
+        2:  228:    : transferId(id), amount(amt), fromAccount(from), toAccount(to) {}
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 0%
+branch  3 taken 100%
+        -:  229:
+function _ZN10minimarket7banking12BankTransfer15executeTransferEv called 1 returned 100% blocks executed 100%
+        1:  230:bool BankTransfer::executeTransfer() {
+        1:  231:    return validateAccounts() && amount > 0 && amount <= 50000;
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 0%
+branch  3 taken 100%
+        -:  232:}
+        -:  233:
+function _ZNK10minimarket7banking12BankTransfer16validateAccountsEv called 2 returned 100% blocks executed 100%
+        2:  234:bool BankTransfer::validateAccounts() const {
+        2:  235:    return !fromAccount.empty() && !toAccount.empty() && fromAccount != toAccount;
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 0%
+branch  3 taken 100%
+        -:  236:}
+        -:  237:
+        -:  238:// 14. PaymentProcessor implementation
+function _ZN10minimarket7banking16PaymentProcessorC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEd called 1 returned 100% blocks executed 100%
+function _ZN10minimarket7banking16PaymentProcessorC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEd called 1 returned 100% blocks executed 100%
+        2:  239:PaymentProcessor::PaymentProcessor(const std::string& id, double fee)
+        2:  240:    : processorId(id), transactionFee(fee) {}
+        -:  241:
+function _ZNK10minimarket7banking16PaymentProcessor18processCardPaymentERKNS0_4CardEd called 1 returned 100% blocks executed 100%
+        1:  242:bool PaymentProcessor::processCardPayment(const Card& card, double amount) const {
+        1:  243:    return card.processPayment(amount) && amount > 0;
+branch  0 taken 0%
+branch  1 taken 100%
+        -:  244:}
+        -:  245:
+function _ZNK10minimarket7banking16PaymentProcessor12calculateFeeEd called 1 returned 100% blocks executed 100%
+        1:  246:double PaymentProcessor::calculateFee(double amount) const {
+        1:  247:    return amount * transactionFee;
+        -:  248:}
+        -:  249:
+        -:  250:// 15. BankStatement implementation
+function _ZN10minimarket7banking13BankStatementC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEll called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking13BankStatementC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEll called 0 returned 0% blocks executed 0%
+    #####:  251:BankStatement::BankStatement(const std::string& accNumber, std::time_t start, std::time_t end)
+    #####:  252:    : accountNumber(accNumber), periodStart(start), periodEnd(end) {}
+        -:  253:
+function _ZNK10minimarket7banking13BankStatement22calculateEndingBalanceEv called 0 returned 0% blocks executed 0%
+    #####:  254:double BankStatement::calculateEndingBalance() const {
+    #####:  255:    double balance = 0.0;
+    #####:  256:    for (const auto& transaction : transactions) {
+branch  0 never executed
+branch  1 never executed
+    #####:  257:        balance += transaction.getAmount(); // Упрощенный расчет
+        -:  258:    }
+    #####:  259:    return balance;
+        -:  260:}
+        -:  261:
+function _ZNK10minimarket7banking13BankStatement17generatePDFReportEv called 0 returned 0% blocks executed 0%
+    #####:  262:void BankStatement::generatePDFReport() const {
+        -:  263:    // Логика генерации отчета
+    #####:  264:}
+        -:  265:
+        -:  266:// 16. FraudDetector implementation
+function _ZN10minimarket7banking13FraudDetectorC2Ed called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking13FraudDetectorC1Ed called 0 returned 0% blocks executed 0%
+    #####:  267:FraudDetector::FraudDetector(double threshold) : fraudThreshold(threshold) {}
+        -:  268:
+function _ZN10minimarket7banking13FraudDetector11detectFraudERKNS0_11TransactionE called 0 returned 0% blocks executed 0%
+    #####:  269:bool FraudDetector::detectFraud(const Transaction& transaction) {
+    #####:  270:    return transaction.getAmount() > fraudThreshold;
+        -:  271:}
+        -:  272:
+function _ZN10minimarket7banking13FraudDetector20addSuspiciousPatternERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 0 returned 0% blocks executed 0%
+    #####:  273:void FraudDetector::addSuspiciousPattern(const std::string& pattern) {
+    #####:  274:    suspiciousPatterns.push_back(pattern);
+    #####:  275:}
+        -:  276:
+        -:  277:// 17. CurrencyConverter implementation
+function _ZN10minimarket7banking17CurrencyConverterC2Ev called 1 returned 100% blocks executed 36%
+function _ZN10minimarket7banking17CurrencyConverterC1Ev called 1 returned 100% blocks executed 100%
+        2:  278:CurrencyConverter::CurrencyConverter() {
+        1:  279:    exchangeRates = {{"USD", 1.0}, {"EUR", 0.85}, {"GBP", 0.75}};
+branch  0 taken 100%
+branch  1 taken 0%
+branch  2 taken 100%
+branch  3 taken 0%
+branch  4 taken 100%
+branch  5 taken 0%
+branch  6 taken 100%
+branch  7 taken 0%
+        2:  280:}
+        -:  281:
+function _ZNK10minimarket7banking17CurrencyConverter13convertAmountEdRKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 2 returned 100% blocks executed 83%
+        2:  282:double CurrencyConverter::convertAmount(double amount, const std::string& from,
+        -:  283:                                       const std::string& to) const {
+        2:  284:    auto fromIt = exchangeRates.find(from);
+        2:  285:    auto toIt = exchangeRates.find(to);
+        2:  286:    if (fromIt == exchangeRates.end() || toIt == exchangeRates.end()) return 0.0;
+branch  0 taken 0%
+branch  1 taken 100%
+branch  2 taken 0%
+branch  3 taken 100%
+        2:  287:    return amount * toIt->second / fromIt->second;
+        2:  288:}
+        -:  289:
+function _ZN10minimarket7banking17CurrencyConverter18updateExchangeRateERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEd called 1 returned 100% blocks executed 100%
+        1:  290:void CurrencyConverter::updateExchangeRate(const std::string& currency, double rate) {
+        1:  291:    exchangeRates[currency] = rate;
+        1:  292:}
+        -:  293:
+        -:  294:// 18. InterestCalculator implementation
+function _ZN10minimarket7banking18InterestCalculatorC2Ed called 1 returned 100% blocks executed 100%
+function _ZN10minimarket7banking18InterestCalculatorC1Ed called 1 returned 100% blocks executed 100%
+        2:  295:InterestCalculator::InterestCalculator(double rate) : baseRate(rate) {}
+        -:  296:
+function _ZNK10minimarket7banking18InterestCalculator25calculateCompoundInterestEdi called 1 returned 100% blocks executed 100%
+        1:  297:double InterestCalculator::calculateCompoundInterest(double principal, int years) const {
+        1:  298:    return principal * pow(1 + baseRate/100, years) - principal;
+        -:  299:}
+        -:  300:
+function _ZNK10minimarket7banking18InterestCalculator23calculateSimpleInterestEdi called 1 returned 100% blocks executed 100%
+        1:  301:double InterestCalculator::calculateSimpleInterest(double principal, int years) const {
+        1:  302:    return principal * baseRate / 100 * years;
+        -:  303:}
+        -:  304:
+        -:  305:// 19. TaxCalculator implementation
+function _ZN10minimarket7banking13TaxCalculatorC2Ed called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking13TaxCalculatorC1Ed called 0 returned 0% blocks executed 0%
+    #####:  306:TaxCalculator::TaxCalculator(double rate) : taxRate(rate) {}
+        -:  307:
+function _ZNK10minimarket7banking13TaxCalculator12calculateTaxEd called 0 returned 0% blocks executed 0%
+    #####:  308:double TaxCalculator::calculateTax(double income) const {
+    #####:  309:    return income * taxRate / 100;
+        -:  310:}
+        -:  311:
+function _ZNK10minimarket7banking13TaxCalculator19calculateDeductionsEd called 0 returned 0% blocks executed 0%
+    #####:  312:double TaxCalculator::calculateDeductions(double income) const {
+    #####:  313:    return std::min(income * 0.1, 5000.0); // Упрощенные вычеты
+        -:  314:}
+        -:  315:
+        -:  316:// 20. RiskAssessor implementation
+function _ZN10minimarket7banking12RiskAssessorC2Ed called 1 returned 100% blocks executed 100%
+function _ZN10minimarket7banking12RiskAssessorC1Ed called 1 returned 100% blocks executed 100%
+        2:  317:RiskAssessor::RiskAssessor(double threshold) : riskThreshold(threshold) {}
+        -:  318:
+function _ZNK10minimarket7banking12RiskAssessor20assessInvestmentRiskEdd called 1 returned 100% blocks executed 100%
+        1:  319:double RiskAssessor::assessInvestmentRisk(double volatility, double returnRate) const {
+        1:  320:    return volatility / returnRate; // Упрощенная формула риска
+        -:  321:}
+        -:  322:
+function _ZNK10minimarket7banking12RiskAssessor11approveLoanERKNS0_11CreditScoreEd called 2 returned 100% blocks executed 100%
+        2:  323:bool RiskAssessor::approveLoan(const CreditScore& score, double amount) const {
+        2:  324:    return score.qualifyForLoan(amount) && amount <= riskThreshold;
+branch  0 taken 0%
+branch  1 taken 100%
+        -:  325:}
+        -:  326:
+        -:  327:// 21. CustomerService implementation
+function _ZN10minimarket7banking15CustomerServiceC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEi called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking15CustomerServiceC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEi called 0 returned 0% blocks executed 0%
+    #####:  328:CustomerService::CustomerService(const std::string& dept, int agents)
+    #####:  329:    : department(dept), availableAgents(agents) {}
+        -:  330:
+function _ZN10minimarket7banking15CustomerService15handleComplaintERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 0 returned 0% blocks executed 0%
+    #####:  331:bool CustomerService::handleComplaint(const std::string& complaint) {
+    #####:  332:    return !complaint.empty() && availableAgents > 0;
+branch  0 never executed
+branch  1 never executed
+        -:  333:}
+        -:  334:
+function _ZNK10minimarket7banking15CustomerService16estimateWaitTimeEi called 0 returned 0% blocks executed 0%
+    #####:  335:int CustomerService::estimateWaitTime(int queueLength) const {
+    #####:  336:    return queueLength * 5; // 5 минут на клиента
+        -:  337:}
+        -:  338:
+        -:  339:// 22. SecuritySystem implementation
+function _ZN10minimarket7banking14SecuritySystemC2Ei called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking14SecuritySystemC1Ei called 0 returned 0% blocks executed 0%
+    #####:  340:SecuritySystem::SecuritySystem(int level) : securityLevel(level) {}
+        -:  341:
+function _ZN10minimarket7banking14SecuritySystem16authenticateUserERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 0 returned 0% blocks executed 0%
+    #####:  342:bool SecuritySystem::authenticateUser(const std::string& credentials) {
+    #####:  343:    return credentials.length() >= 8 && securityLevel >= 2;
+branch  0 never executed
+branch  1 never executed
+        -:  344:}
+        -:  345:
+function _ZN10minimarket7banking14SecuritySystem16logSecurityEventERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 0 returned 0% blocks executed 0%
+    #####:  346:void SecuritySystem::logSecurityEvent(const std::string& event) {
+    #####:  347:    accessLogs.push_back(event);
+    #####:  348:}
+        -:  349:
+        -:  350:// 23. AuditTrail implementation
+function _ZN10minimarket7banking10AuditTrailC2Ev called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking10AuditTrailC1Ev called 0 returned 0% blocks executed 0%
+    #####:  351:AuditTrail::AuditTrail() {}
+        -:  352:
+function _ZN10minimarket7banking10AuditTrail17recordTransactionERKNS0_11TransactionE called 0 returned 0% blocks executed 0%
+    #####:  353:void AuditTrail::recordTransaction(const Transaction& transaction) {
+    #####:  354:    auditRecords.push_back(transaction.generateReceipt());
+branch  0 never executed
+branch  1 never executed
+    #####:  355:}
+        -:  356:
+function _ZNK10minimarket7banking10AuditTrail16verifyComplianceEv called 0 returned 0% blocks executed 0%
+    #####:  357:bool AuditTrail::verifyCompliance() const {
+    #####:  358:    return auditRecords.size() <= 1000; // Упрощенная проверка
+        -:  359:}
+        -:  360:
+        -:  361:// 24. NotificationService implementation
+function _ZN10minimarket7banking19NotificationServiceC2Ev called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking19NotificationServiceC1Ev called 0 returned 0% blocks executed 0%
+    #####:  362:NotificationService::NotificationService() {
+    #####:  363:    notificationChannels = {"SMS", "Email", "Push"};
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+    #####:  364:}
+        -:  365:
+function _ZN10minimarket7banking19NotificationService9sendAlertERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEESA_ called 0 returned 0% blocks executed 0%
+    #####:  366:bool NotificationService::sendAlert(const std::string& message, const std::string& channel) {
+    #####:  367:    return !message.empty() && std::find(notificationChannels.begin(),
+branch  0 never executed
+branch  1 never executed
+    #####:  368:           notificationChannels.end(), channel) != notificationChannels.end();
+        -:  369:}
+        -:  370:
+function _ZN10minimarket7banking19NotificationService16scheduleReminderERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEEl called 0 returned 0% blocks executed 0%
+    #####:  371:void NotificationService::scheduleReminder(const std::string& reminder, std::time_t time) {
+        -:  372:    // Логика планирования напоминания
+    #####:  373:}
+        -:  374:
+        -:  375:// 25. ReportGenerator implementation
+function _ZN10minimarket7banking15ReportGeneratorC2ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking15ReportGeneratorC1ERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE called 0 returned 0% blocks executed 0%
+    #####:  376:ReportGenerator::ReportGenerator(const std::string& format) : reportFormat(format) {}
+        -:  377:
+function _ZNK10minimarket7banking15ReportGenerator23generateFinancialReportERKNS0_4BankE called 0 returned 0% blocks executed 0%
+    #####:  378:std::string ReportGenerator::generateFinancialReport(const Bank& bank) const {
+    #####:  379:    return "Financial Report: Total Assets = " + std::to_string(bank.calculateTotalAssets());
+branch  0 never executed
+branch  1 never executed
+    #####:  380:}
+        -:  381:
+function _ZNK10minimarket7banking15ReportGenerator18generateRiskReportERKNS0_12RiskAssessorE called 0 returned 0% blocks executed 0%
+    #####:  382:std::string ReportGenerator::generateRiskReport(const RiskAssessor& assessor) const {
+    #####:  383:    return "Risk Report: Threshold = " + std::to_string(/*assessor.getThreshold()*/ 1000);
+branch  0 never executed
+branch  1 never executed
+    #####:  384:}
+        -:  385:
+        -:  386:} // namespace banking
+        -:  387:} // namespace minimarket

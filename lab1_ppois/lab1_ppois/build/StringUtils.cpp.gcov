@@ -1,0 +1,65 @@
+        -:    0:Source:/Users/glebmitko/Desktop/lab1_ppois/src/utils/StringUtils.cpp
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/utils/StringUtils.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/utils/StringUtils.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "../../include/utils/StringUtils.hpp"
+        -:    2:
+        -:    3:namespace utils {
+        -:    4:
+function _ZN5utils11StringUtils7toLowerERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE called 250 returned 100% blocks executed 50%
+      250:    5:std::string StringUtils::toLower(const std::string& str) {
+      250:    6:    std::string result = str;
+      250:    7:    std::transform(result.begin(), result.end(), result.begin(),
+branch  0 taken 100%
+branch  1 taken 0%
+function _ZZN5utils11StringUtils7toLowerERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEEENK3$_0clEh called 1763 returned 100% blocks executed 100%
+     1763:    8:                   [](unsigned char c) { return std::tolower(c); });
+      250:    9:    return result;
+      250:   10:}
+branch  0 taken 100%
+branch  1 taken 0%
+        -:   11:
+function _ZN5utils11StringUtils4trimERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE called 437 returned 100% blocks executed 100%
+      437:   12:std::string StringUtils::trim(const std::string& str) {
+      437:   13:    size_t start = str.find_first_not_of(" \t\n\r");
+      437:   14:    if (start == std::string::npos) return "";
+branch  0 taken 2%
+branch  1 taken 98%
+        -:   15:    
+      427:   16:    size_t end = str.find_last_not_of(" \t\n\r");
+      427:   17:    return str.substr(start, end - start + 1);
+      437:   18:}
+        -:   19:
+function _ZN5utils11StringUtils8isNumberERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE called 11 returned 100% blocks executed 93%
+       11:   20:bool StringUtils::isNumber(const std::string& str) {
+       11:   21:    if (str.empty()) return false;
+branch  0 taken 9%
+branch  1 taken 91%
+        -:   22:    
+       10:   23:    size_t start = 0;
+       10:   24:    if (str[0] == '-' || str[0] == '+') {
+branch  0 taken 70%
+branch  1 taken 30%
+branch  2 taken 29%
+branch  3 taken 71%
+        5:   25:        start = 1;
+        5:   26:        if (str.length() == 1) return false;
+branch  0 taken 0%
+branch  1 taken 100%
+        5:   27:    }
+        -:   28:    
+       29:   29:    for (size_t i = start; i < str.length(); ++i) {
+branch  0 taken 83%
+branch  1 taken 17%
+       24:   30:        if (!std::isdigit(str[i])) {
+branch  0 taken 21%
+branch  1 taken 79%
+        5:   31:            return false;
+        -:   32:        }
+       19:   33:    }
+        -:   34:    
+        5:   35:    return true;
+       11:   36:}
+        -:   37:
+        -:   38:}

@@ -1,0 +1,29 @@
+        -:    0:Source:/Users/glebmitko/Desktop/lab1_ppois/src/dictionary/../../include/dictionary/DictionaryNode.hpp
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/dictionary/Dictionary.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/dictionary/Dictionary.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#pragma once
+        -:    2:
+        -:    3:#include <string>
+        -:    4:#include <memory>
+        -:    5:
+        -:    6:namespace dictionary {
+        -:    7:
+        -:    8:class DictionaryNode {
+        -:    9:public:
+        -:   10:    std::string englishWord;
+        -:   11:    std::string russianTranslation;
+        -:   12:    std::unique_ptr<DictionaryNode> left;
+        -:   13:    std::unique_ptr<DictionaryNode> right;
+        -:   14:    
+        -:   15:    DictionaryNode(const std::string& eng, const std::string& rus);
+function _ZN10dictionary14DictionaryNodeD1Ev called 0 returned 0% blocks executed 0%
+function _ZN10dictionary14DictionaryNodeD2Ev called 0 returned 0% blocks executed 0%
+    #####:   16:    ~DictionaryNode() = default;
+        -:   17:    
+        -:   18:    DictionaryNode(const DictionaryNode&) = delete;
+        -:   19:    DictionaryNode& operator=(const DictionaryNode&) = delete;
+        -:   20:};
+        -:   21:
+        -:   22:}

@@ -1,0 +1,97 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__algorithm/find.h
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:// -*- C++ -*-
+        -:    2://===----------------------------------------------------------------------===//
+        -:    3://
+        -:    4:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    5:// See https://llvm.org/LICENSE.txt for license information.
+        -:    6:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    7://
+        -:    8://===----------------------------------------------------------------------===//
+        -:    9:
+        -:   10:#ifndef _LIBCPP___ALGORITHM_FIND_H
+        -:   11:#define _LIBCPP___ALGORITHM_FIND_H
+        -:   12:
+        -:   13:#include <__algorithm/unwrap_iter.h>
+        -:   14:#include <__config>
+        -:   15:#include <__functional/identity.h>
+        -:   16:#include <__functional/invoke.h>
+        -:   17:#include <__string/constexpr_c_functions.h>
+        -:   18:#include <__type_traits/is_same.h>
+        -:   19:
+        -:   20:#ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
+        -:   21:#  include <cwchar>
+        -:   22:#endif
+        -:   23:
+        -:   24:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   25:#  pragma GCC system_header
+        -:   26:#endif
+        -:   27:
+        -:   28:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   29:
+        -:   30:template <class _Iter, class _Sent, class _Tp, class _Proj>
+        -:   31:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 _Iter
+function _ZNSt3__111__find_implB8ue170006IPNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES7_S6_NS_10__identityEEET_S9_T0_RKT1_RT2_ called 0 returned 0% blocks executed 0%
+    #####:   32:__find_impl(_Iter __first, _Sent __last, const _Tp& __value, _Proj& __proj) {
+    #####:   33:  for (; __first != __last; ++__first)
+branch  0 never executed
+branch  1 never executed
+    #####:   34:    if (std::__invoke(__proj, *__first) == __value)
+branch  0 never executed
+branch  1 never executed
+    #####:   35:      break;
+    #####:   36:  return __first;
+        -:   37:}
+        -:   38:
+        -:   39:template <class _Tp,
+        -:   40:          class _Up,
+        -:   41:          class _Proj,
+        -:   42:          __enable_if_t<__is_identity<_Proj>::value && __libcpp_is_trivially_equality_comparable<_Tp, _Up>::value &&
+        -:   43:                            sizeof(_Tp) == 1,
+        -:   44:                        int> = 0>
+        -:   45:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 _Tp*
+        -:   46:__find_impl(_Tp* __first, _Tp* __last, const _Up& __value, _Proj&) {
+        -:   47:  if (auto __ret = std::__constexpr_memchr(__first, __value, __last - __first))
+        -:   48:    return __ret;
+        -:   49:  return __last;
+        -:   50:}
+        -:   51:
+        -:   52:#ifndef _LIBCPP_HAS_NO_WIDE_CHARACTERS
+        -:   53:// TODO: Enable this unconditionally once Clang allows casting from a pointer to an ARC pointer to a
+        -:   54://       normal pointer. See rdar://114039220 for details.
+        -:   55:#  ifndef _LIBCPP_HAS_OBJC_ARC
+        -:   56:
+        -:   57:// TODO: Enable this unconditionally once we can assume that everyone using libc++ is linking against
+        -:   58://       a suitable C library. Otherwise we get undefined references to wmemchr.
+        -:   59:#    if 0
+        -:   60:template <class _Tp,
+        -:   61:          class _Up,
+        -:   62:          class _Proj,
+        -:   63:          __enable_if_t<__is_identity<_Proj>::value && __libcpp_is_trivially_equality_comparable<_Tp, _Up>::value &&
+        -:   64:                            sizeof(_Tp) == sizeof(wchar_t) && _LIBCPP_ALIGNOF(_Tp) >= _LIBCPP_ALIGNOF(wchar_t),
+        -:   65:                        int> = 0>
+        -:   66:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 _Tp*
+        -:   67:__find_impl(_Tp* __first, _Tp* __last, const _Up& __value, _Proj&) {
+        -:   68:  if (auto __ret = std::__constexpr_wmemchr(__first, __value, __last - __first))
+        -:   69:    return __ret;
+        -:   70:  return __last;
+        -:   71:}
+        -:   72:#    endif
+        -:   73:#  endif
+        -:   74:#endif // _LIBCPP_HAS_NO_WIDE_CHARACTERS
+        -:   75:
+        -:   76:template <class _InputIterator, class _Tp>
+        -:   77:_LIBCPP_NODISCARD_EXT inline _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_SINCE_CXX20 _InputIterator
+function _ZNSt3__14findB8ue170006INS_11__wrap_iterIPNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEEES7_EET_SA_SA_RKT0_ called 0 returned 0% blocks executed 0%
+    #####:   78:find(_InputIterator __first, _InputIterator __last, const _Tp& __value) {
+        -:   79:  __identity __proj;
+    #####:   80:  return std::__rewrap_iter(
+    #####:   81:      __first, std::__find_impl(std::__unwrap_iter(__first), std::__unwrap_iter(__last), __value, __proj));
+        -:   82:}
+        -:   83:
+        -:   84:_LIBCPP_END_NAMESPACE_STD
+        -:   85:
+        -:   86:#endif // _LIBCPP___ALGORITHM_FIND_H

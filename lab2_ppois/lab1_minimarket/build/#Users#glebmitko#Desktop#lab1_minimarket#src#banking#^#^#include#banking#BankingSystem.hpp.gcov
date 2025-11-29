@@ -1,0 +1,325 @@
+        -:    0:Source:/Users/glebmitko/Desktop/lab1_minimarket/src/banking/../../include/banking/BankingSystem.hpp
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/banking/BankingSystem.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/banking/BankingSystem.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#pragma once
+        -:    2:#include <string>
+        -:    3:#include <vector>
+        -:    4:#include <memory>
+        -:    5:#include <ctime>
+        -:    6:#include <unordered_map>
+        -:    7:#include "../utils/Exceptions.hpp"
+        -:    8:
+        -:    9:namespace minimarket {
+        -:   10:namespace banking {
+        -:   11:
+        -:   12:// 1. Базовые классы (5 классов)
+function _ZN10minimarket7banking7BalanceD1Ev called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking7BalanceD2Ev called 0 returned 0% blocks executed 0%
+        -:   13:class Balance {
+        -:   14:private:
+        -:   15:    double availableAmount;
+        -:   16:    double reservedAmount;
+        -:   17:    std::string currencyCode;
+        -:   18:public:
+        -:   19:    Balance(double amount, const std::string& currency = "USD");
+function _ZNK10minimarket7banking7Balance18getAvailableAmountEv called 0 returned 0% blocks executed 0%
+    #####:   20:    double getAvailableAmount() const { return availableAmount; } // ← ДОБАВИТЬ
+        -:   21:    double getReservedAmount() const { return reservedAmount; }
+        -:   22:    bool withdraw(double amount);                    // Уникальное поведение 1
+        -:   23:    void reserveFunds(double amount);               // Уникальное поведение 2
+        -:   24:    double calculateTotal() const;                  // Уникальное поведение 3
+        -:   25:};
+        -:   26:
+        -:   27:class Transaction {
+        -:   28:private:
+        -:   29:    std::string transactionId;
+        -:   30:    double amount;
+        -:   31:    std::string type;
+        -:   32:    std::time_t timestamp;
+        -:   33:public:
+        -:   34:    Transaction(const std::string& id, double amt, const std::string& tp);
+function _ZNK10minimarket7banking11Transaction9getAmountEv called 0 returned 0% blocks executed 0%
+    #####:   35:    double getAmount() const { return amount; }
+        -:   36:    bool validateTransaction() const;               // Уникальное поведение 4
+        -:   37:    std::string generateReceipt() const;            // Уникальное поведение 5
+        -:   38:};
+        -:   39:
+function _ZN10minimarket7banking7AccountD2Ev called 0 returned 0% blocks executed 0%
+function _ZN10minimarket7banking7AccountD1Ev called 0 returned 0% blocks executed 0%
+        -:   40:class Account {
+        -:   41:private:
+        -:   42:    std::string accountNumber;
+        -:   43:    std::string holderName;
+        -:   44:    std::shared_ptr<Balance> balance;
+        -:   45:public:
+        -:   46:    Account(const std::string& number, const std::string& name);
+        -:   47:    
+function _ZNK10minimarket7banking7Account16getAccountNumberEv called 0 returned 0% blocks executed 0%
+    #####:   48:    std::string getAccountNumber() const { return accountNumber; }
+        -:   49:    std::string getAccountHolderName() const { return holderName; }
+        -:   50:    double getAvailableBalance() const;
+        -:   51:    
+        -:   52:    bool transferMoney(double amount, Account& target);
+        -:   53:    bool applyOverdraft(double limit);
+        -:   54:    double calculateInterest() const;
+        -:   55:};
+        -:   56:
+        -:   57:class Card {
+        -:   58:private:
+        -:   59:    std::string cardNumber;
+        -:   60:    std::string holderName;
+        -:   61:    std::string expiryDate;
+        -:   62:    int pinAttempts;
+        -:   63:public:
+        -:   64:    Card(const std::string& number, const std::string& name, const std::string& expiry);
+        -:   65:    
+        -:   66:    std::string getCardNumber() const { return cardNumber; }
+        -:   67:    std::string getCardHolderName() const { return holderName; }
+        -:   68:    std::string getExpiryDate() const { return expiryDate; }
+        -:   69:    
+        -:   70:    bool verifyPin(const std::string& pin);
+        -:   71:    bool processPayment(double amount) const;
+        -:   72:    void blockCard();
+        -:   73:};
+        -:   74:
+        -:   75:class Bank {
+        -:   76:private:
+        -:   77:    std::string bankCode;
+        -:   78:    std::string bankName;
+        -:   79:    std::vector<std::shared_ptr<Account>> accounts;
+        -:   80:public:
+        -:   81:    Bank(const std::string& code, const std::string& name);
+        -:   82:    
+        -:   83:    std::string getBankCode() const;
+        -:   84:    std::string getBankName() const;
+        -:   85:    bool addAccount(const std::shared_ptr<Account>& account);
+        -:   86:    bool openAccount(const std::string& holderName);
+        -:   87:    bool closeAccount(const std::string& accountNumber);
+        -:   88:    double calculateTotalAssets() const;
+        -:   89:    size_t getTotalAccountsCount() const;
+        -:   90:};
+        -:   91:
+        -:   92:// 2. Кредитные продукты (5 классов)
+        -:   93:class CreditCard : public Card {
+        -:   94:private:
+        -:   95:    double creditLimit;
+        -:   96:    double usedCredit;
+        -:   97:    double interestRate;
+        -:   98:public:
+        -:   99:    CreditCard(const std::string& number, const std::string& name,
+        -:  100:               const std::string& expiry, double limit, double interest)
+        -:  101:        : Card(number, name, expiry), creditLimit(limit), usedCredit(0.0), interestRate(interest) {}
+        -:  102:    
+        -:  103:    double getCreditLimit() const { return creditLimit; }
+        -:  104:    double getUsedCredit() const { return usedCredit; }
+        -:  105:    double calculateAvailableCredit() const;
+        -:  106:    bool useCredit(double amount);
+        -:  107:};
+        -:  108:
+        -:  109:class Loan {
+        -:  110:private:
+        -:  111:    double principalAmount;
+        -:  112:    double interestRate;
+        -:  113:    int termMonths;
+        -:  114:public:
+        -:  115:    Loan(double principal, double rate, int term);
+function _ZNK10minimarket7banking4Loan18getPrincipalAmountEv called 6 returned 100% blocks executed 100%
+        6:  116:    double getPrincipalAmount() const { return principalAmount; }
+        -:  117:    double calculateMonthlyPayment() const;         // Уникальное поведение 17
+        -:  118:    double calculateTotalInterest() const;          // Уникальное поведение 18
+        -:  119:};
+        -:  120:
+        -:  121:class Mortgage : public Loan {
+        -:  122:private:
+        -:  123:    std::string propertyAddress;
+        -:  124:    double downPayment;
+        -:  125:public:
+        -:  126:    Mortgage(double principal, double rate, int term,
+        -:  127:             const std::string& address, double down);
+        -:  128:    bool validateDownPayment() const;               // Уникальное поведение 19
+        -:  129:    double calculateLTV() const;                    // Уникальное поведение 20
+        -:  130:};
+        -:  131:
+        -:  132:class InvestmentAccount : public Account {
+        -:  133:private:
+        -:  134:    std::string investmentType;
+        -:  135:    double riskLevel;
+        -:  136:public:
+        -:  137:    InvestmentAccount(const std::string& number, const std::string& name,
+        -:  138:                      const std::string& type, double risk);
+        -:  139:    double calculateExpectedReturn() const;         // Уникальное поведение 21
+        -:  140:    bool rebalancePortfolio();                      // Уникальное поведение 22
+        -:  141:};
+        -:  142:
+        -:  143:class CreditScore {
+        -:  144:private:
+        -:  145:    int score;
+        -:  146:    std::time_t lastUpdate;
+        -:  147:public:
+        -:  148:    CreditScore(int initialScore);
+        -:  149:    bool qualifyForLoan(double amount) const;       // Уникальное поведение 23
+        -:  150:    void updateScore(int newScore);                 // Уникальное поведение 24
+        -:  151:};
+        -:  152:
+        -:  153:// 3. Операционные классы (5 классов)
+        -:  154:class ATM {
+        -:  155:private:
+        -:  156:    std::string atmId;
+        -:  157:    std::string location;
+        -:  158:    double cashBalance;
+        -:  159:public:
+        -:  160:    ATM(const std::string& id, const std::string& loc, double cash);
+        -:  161:    bool dispenseCash(double amount);               // Уникальное поведение 25
+        -:  162:    bool processDeposit(double amount);             // Уникальное поведение 26
+        -:  163:};
+        -:  164:
+        -:  165:class Branch {
+        -:  166:private:
+        -:  167:    std::string branchCode;
+        -:  168:    std::string address;
+        -:  169:public:
+        -:  170:    Branch(const std::string& code, const std::string& addr)
+        -:  171:        : branchCode(code), address(addr) {}
+        -:  172:    
+        -:  173:    std::string getBranchCode() const { return branchCode; }
+        -:  174:    std::string getAddress() const { return address; }
+        -:  175:    
+        -:  176:    bool addEmployee(const std::string& employeeId) { return !employeeId.empty(); } // Упрощенная версия
+        -:  177:    int calculateStaffRequirements() const { return 5; } // Уникальное поведение 28
+        -:  178:};
+        -:  179:
+        -:  180:class BankTransfer {
+        -:  181:private:
+        -:  182:    std::string transferId;
+        -:  183:    double amount;
+        -:  184:    std::string fromAccount;
+        -:  185:    std::string toAccount;
+        -:  186:public:
+        -:  187:    BankTransfer(const std::string& id, double amt,
+        -:  188:                 const std::string& from, const std::string& to);
+        -:  189:    bool executeTransfer();                         // Уникальное поведение 29
+        -:  190:    bool validateAccounts() const;                  // Уникальное поведение 30
+        -:  191:};
+        -:  192:
+        -:  193:class PaymentProcessor {
+        -:  194:private:
+        -:  195:    std::string processorId;
+        -:  196:    double transactionFee;
+        -:  197:public:
+        -:  198:    PaymentProcessor(const std::string& id, double fee);
+        -:  199:    bool processCardPayment(const Card& card, double amount) const; // Уникальное поведение 31
+        -:  200:    double calculateFee(double amount) const;       // Уникальное поведение 32
+        -:  201:};
+        -:  202:
+        -:  203:class BankStatement {
+        -:  204:private:
+        -:  205:    std::string accountNumber;
+        -:  206:    std::vector<Transaction> transactions;
+        -:  207:    std::time_t periodStart;
+        -:  208:    std::time_t periodEnd;
+        -:  209:public:
+        -:  210:    BankStatement(const std::string& accNumber, std::time_t start, std::time_t end);
+        -:  211:    double calculateEndingBalance() const;          // Уникальное поведение 33
+        -:  212:    void generatePDFReport() const;                 // Уникальное поведение 34
+        -:  213:};
+        -:  214:
+        -:  215:// 4. Специализированные сервисы (5 классов)
+        -:  216:class FraudDetector {
+        -:  217:private:
+        -:  218:    std::vector<std::string> suspiciousPatterns;
+        -:  219:    double fraudThreshold;
+        -:  220:public:
+        -:  221:    FraudDetector(double threshold);
+        -:  222:    bool detectFraud(const Transaction& transaction); // Уникальное поведение 35
+        -:  223:    void addSuspiciousPattern(const std::string& pattern); // Уникальное поведение 36
+        -:  224:};
+        -:  225:
+        -:  226:class CurrencyConverter {
+        -:  227:private:
+        -:  228:    std::unordered_map<std::string, double> exchangeRates;
+        -:  229:public:
+        -:  230:    CurrencyConverter();
+        -:  231:    double convertAmount(double amount, const std::string& from,
+        -:  232:                        const std::string& to) const; // Уникальное поведение 37
+        -:  233:    void updateExchangeRate(const std::string& currency, double rate); // Уникальное поведение 38
+        -:  234:};
+        -:  235:
+        -:  236:class InterestCalculator {
+        -:  237:private:
+        -:  238:    double baseRate;
+        -:  239:public:
+        -:  240:    InterestCalculator(double rate);
+        -:  241:    double calculateCompoundInterest(double principal, int years) const; // Уникальное поведение 39
+        -:  242:    double calculateSimpleInterest(double principal, int years) const; // Уникальное поведение 40
+        -:  243:};
+        -:  244:
+        -:  245:class TaxCalculator {
+        -:  246:private:
+        -:  247:    double taxRate;
+        -:  248:public:
+        -:  249:    TaxCalculator(double rate);
+        -:  250:    double calculateTax(double income) const;       // Уникальное поведение 41
+        -:  251:    double calculateDeductions(double income) const; // Уникальное поведение 42
+        -:  252:};
+        -:  253:
+        -:  254:class RiskAssessor {
+        -:  255:private:
+        -:  256:    double riskThreshold;
+        -:  257:public:
+        -:  258:    RiskAssessor(double threshold);
+        -:  259:    double assessInvestmentRisk(double volatility, double returnRate) const; // Уникальное поведение 43
+        -:  260:    bool approveLoan(const CreditScore& score, double amount) const; // Уникальное поведение 44
+        -:  261:};
+        -:  262:
+        -:  263:// 5. Вспомогательные классы (5 классов)
+        -:  264:class CustomerService {
+        -:  265:private:
+        -:  266:    std::string department;
+        -:  267:    int availableAgents;
+        -:  268:public:
+        -:  269:    CustomerService(const std::string& dept, int agents);
+        -:  270:    bool handleComplaint(const std::string& complaint); // Уникальное поведение 45
+        -:  271:    int estimateWaitTime(int queueLength) const;    // Уникальное поведение 46
+        -:  272:};
+        -:  273:
+        -:  274:class SecuritySystem {
+        -:  275:private:
+        -:  276:    int securityLevel;
+        -:  277:    std::vector<std::string> accessLogs;
+        -:  278:public:
+        -:  279:    SecuritySystem(int level);
+        -:  280:    bool authenticateUser(const std::string& credentials); // Уникальное поведение 47
+        -:  281:    void logSecurityEvent(const std::string& event); // Уникальное поведение 48
+        -:  282:};
+        -:  283:
+        -:  284:class AuditTrail {
+        -:  285:private:
+        -:  286:    std::vector<std::string> auditRecords;
+        -:  287:public:
+        -:  288:    AuditTrail();
+        -:  289:    void recordTransaction(const Transaction& transaction); // Уникальное поведение 49
+        -:  290:    bool verifyCompliance() const;                  // Уникальное поведение 50
+        -:  291:};
+        -:  292:
+        -:  293:class NotificationService {
+        -:  294:private:
+        -:  295:    std::vector<std::string> notificationChannels;
+        -:  296:public:
+        -:  297:    NotificationService();
+        -:  298:    bool sendAlert(const std::string& message, const std::string& channel); // Уникальное поведение 51
+        -:  299:    void scheduleReminder(const std::string& reminder, std::time_t time); // Уникальное поведение 52
+        -:  300:};
+        -:  301:
+        -:  302:class ReportGenerator {
+        -:  303:private:
+        -:  304:    std::string reportFormat;
+        -:  305:public:
+        -:  306:    ReportGenerator(const std::string& format);
+        -:  307:    std::string generateFinancialReport(const Bank& bank) const; // Уникальное поведение 53
+        -:  308:    std::string generateRiskReport(const RiskAssessor& assessor) const; // Уникальное поведение 54
+        -:  309:};
+        -:  310:
+        -:  311:} // namespace banking
+        -:  312:} // namespace minimarket

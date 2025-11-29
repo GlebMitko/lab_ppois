@@ -1,0 +1,21 @@
+        -:    0:Source:/Users/glebmitko/Desktop/lab1_ppois/src/dictionary/DictionaryNode.cpp
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/dictionary/DictionaryNode.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/dictionary/DictionaryNode.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "../../include/dictionary/DictionaryNode.hpp"
+        -:    2:
+        -:    3:namespace dictionary {
+        -:    4:
+function _ZN10dictionary14DictionaryNodeC2ERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_ called 194 returned 100% blocks executed 50%
+function _ZN10dictionary14DictionaryNodeC1ERKNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES9_ called 194 returned 100% blocks executed 100%
+      388:    5:DictionaryNode::DictionaryNode(const std::string& eng, const std::string& rus)
+      194:    6:    : englishWord(eng)
+      194:    7:    , russianTranslation(rus)
+branch  0 taken 100%
+branch  1 taken 0%
+      194:    8:    , left(nullptr)
+      388:    9:    , right(nullptr) {
+      388:   10:}
+        -:   11:
+        -:   12:}

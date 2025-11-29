@@ -1,0 +1,63 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/identity.h
+        -:    0:Graph:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcno
+        -:    0:Data:CMakeFiles/run_tests.dir/src/users/UserSystem.cpp.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:// -*- C++ -*-
+        -:    2://===----------------------------------------------------------------------===//
+        -:    3://
+        -:    4:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    5:// See https://llvm.org/LICENSE.txt for license information.
+        -:    6:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    7://
+        -:    8://===----------------------------------------------------------------------===//
+        -:    9:
+        -:   10:#ifndef _LIBCPP___FUNCTIONAL_IDENTITY_H
+        -:   11:#define _LIBCPP___FUNCTIONAL_IDENTITY_H
+        -:   12:
+        -:   13:#include <__config>
+        -:   14:#include <__type_traits/integral_constant.h>
+        -:   15:#include <__utility/forward.h>
+        -:   16:
+        -:   17:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   18:#  pragma GCC system_header
+        -:   19:#endif
+        -:   20:
+        -:   21:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   22:
+        -:   23:template <class _Tp>
+        -:   24:struct __is_identity : false_type {};
+        -:   25:
+        -:   26:struct __identity {
+        -:   27:  template <class _Tp>
+function _ZNKSt3__110__identityclB8ue170006IRNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEEEOT_SA_ called 0 returned 0% blocks executed 0%
+    #####:   28:  _LIBCPP_NODISCARD _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR _Tp&& operator()(_Tp&& __t) const _NOEXCEPT {
+    #####:   29:    return std::forward<_Tp>(__t);
+        -:   30:  }
+        -:   31:
+        -:   32:  using is_transparent = void;
+        -:   33:};
+        -:   34:
+        -:   35:template <>
+        -:   36:struct __is_identity<__identity> : true_type {};
+        -:   37:
+        -:   38:#if _LIBCPP_STD_VER >= 20
+        -:   39:
+        -:   40:struct identity {
+        -:   41:    template<class _Tp>
+        -:   42:    _LIBCPP_NODISCARD_EXT _LIBCPP_HIDE_FROM_ABI constexpr _Tp&& operator()(_Tp&& __t) const noexcept
+        -:   43:    {
+        -:   44:        return _VSTD::forward<_Tp>(__t);
+        -:   45:    }
+        -:   46:
+        -:   47:    using is_transparent = void;
+        -:   48:};
+        -:   49:
+        -:   50:template <>
+        -:   51:struct __is_identity<identity> : true_type {};
+        -:   52:
+        -:   53:#endif // _LIBCPP_STD_VER >= 20
+        -:   54:
+        -:   55:_LIBCPP_END_NAMESPACE_STD
+        -:   56:
+        -:   57:#endif // _LIBCPP___FUNCTIONAL_IDENTITY_H
