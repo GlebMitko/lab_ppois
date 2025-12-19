@@ -1,5 +1,5 @@
 CMakeFiles/lab_work.dir/src/main.cpp.o: \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/main.cpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/main.cpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/iostream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__assert \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__config \
@@ -823,7 +823,7 @@ CMakeFiles/lab_work.dir/src/main.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_types/_nl_item.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__locale_dir/locale_base_api/bsd_locale_defaults.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdarg \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/../include/banking/BankingSystem.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/banking/Bank.hpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/vector \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__format/formatter.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__format/format_fwd.h \
@@ -850,39 +850,30 @@ CMakeFiles/lab_work.dir/src/main.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/array \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__memory/temp_value.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__split_buffer \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/banking/Account.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/banking/Balance.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/banking/../../include/utils/Exceptions.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/banking/Card.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/banking/CreditCard.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/banking/Transaction.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/products/Product.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/products/Category.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/products/Inventory.hpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/unordered_map \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/is_transparent.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__hash_table \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__iterator/ranges_iterator_traits.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__node_handle \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/optional \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/../include/banking/../utils/Exceptions.hpp \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/../include/products/ProductManagement.hpp \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/map \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__tree \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/functional \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/binary_negate.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/bind.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/bind_back.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/perfect_forward.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/bind_front.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/binder1st.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/binder2nd.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/boyer_moore_searcher.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/compose.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/default_searcher.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/function.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__memory/builtin_new_allocator.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__type_traits/strip_signature.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/mem_fn.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/mem_fun_ref.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/not_fn.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/pointer_to_binary_function.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/pointer_to_unary_function.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__functional/unary_negate.h \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/../include/products/../utils/Exceptions.hpp \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/../include/users/UserSystem.hpp \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/../include/users/../utils/Exceptions.hpp \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/../include/orders/OrderSystem.hpp \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/../include/orders/../utils/Exceptions.hpp \
-  /Users/glebmitko/Desktop/lab1_minimarket/src/../include/utils/Exceptions.hpp
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/products/DiscountSystem.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/users/Customer.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/users/User.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/users/Employee.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/users/Admin.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/users/UserProfile.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/users/Address.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/orders/Order.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/orders/OrderItem.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/orders/ShoppingCart.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/orders/Payment.hpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/src/../include/utils/Exceptions.hpp

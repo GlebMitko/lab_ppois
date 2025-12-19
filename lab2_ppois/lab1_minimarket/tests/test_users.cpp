@@ -1,23 +1,36 @@
-#include "../include/users/UserSystem.hpp"
-#include "../include/utils/Exceptions.hpp"
+// tests/test_users.cpp
+
 #include <iostream>
 #include <cassert>
 #include <memory>
 #include <ctime>
+#include <string>
+#include <vector>
+
+// Подключаем индивидуальные заголовки
+#include "../include/users/User.hpp"
+#include "../include/users/Customer.hpp"
+#include "../include/users/Employee.hpp"
+#include "../include/users/Admin.hpp"
+#include "../include/users/UserProfile.hpp"
+#include "../include/users/Address.hpp"
+#include "../include/users/ContactInfo.hpp"
+#include "../include/users/LoginCredentials.hpp"
+#include "../include/users/UserSession.hpp"
+#include "../include/users/UserPreferences.hpp"
+
+#include "../include/utils/Exceptions.hpp"
 
 void testUserCreation() {
     std::cout << "Testing User creation..." << std::endl;
     
-    // Test valid user creation
     minimarket::users::User user("USER001", "john_doe", "john@example.com");
     assert(user.getUserId() == "USER001");
     assert(user.getUsername() == "john_doe");
     assert(user.getEmail() == "john@example.com");
     
-    // Test user role
     assert(user.getUserRole() == "BaseUser");
     
-    // Test email update
     assert(user.updateEmail("john.new@example.com") == true);
     assert(user.getEmail() == "john.new@example.com");
     
@@ -29,16 +42,14 @@ void testUserAuthentication() {
     
     minimarket::users::User user("USER002", "jane_smith", "jane@example.com");
     
-    // Test valid password
     assert(user.authenticate("Password123!") == true);
     assert(user.authenticate("SecurePass456#") == true);
     
-    // Test invalid passwords
-    assert(user.authenticate("short") == false); // Too short
-    assert(user.authenticate("nouppercase123") == false); // No uppercase, no special chars ← ИСПРАВЛЕНО
-    assert(user.authenticate("NOLOWERCASE123") == false); // No lowercase, no special chars ← ИСПРАВЛЕНО
-    assert(user.authenticate("NoNumbersOrSpecial") == false); // No numbers, no special chars ← ИСПРАВЛЕНО
-    assert(user.authenticate("NoSpecial123") == false); // No special chars
+    assert(user.authenticate("short") == false);
+    assert(user.authenticate("nouppercase123") == false);
+    assert(user.authenticate("NOLOWERCASE123") == false);
+    assert(user.authenticate("NoNumbersOrSpecial") == false);
+    assert(user.authenticate("NoSpecial123") == false);
     
     std::cout << "✅ testUserAuthentication: PASSED" << std::endl;
 }
@@ -48,24 +59,19 @@ void testCustomerOperations() {
     
     minimarket::users::Customer customer("CUST001", "John Customer", "john.customer@email.com", "+1234567890");
     
-    // Test customer creation
-    assert(customer.getCustomerId() == "CUST001");
+    assert(customer.getUserId() == "CUST001"); // Customer наследует User
     
-    // Проверяем роль - может возвращать "Customer" или другую строку
     std::string role = customer.getUserRole();
-    assert(!role.empty()); // Просто проверяем что роль не пустая
+    assert(!role.empty());
     std::cout << "Customer role: " << role << std::endl;
     
-    // Test phone number validation
     assert(customer.validatePhoneNumber() == true);
     
-    // Test loyalty years calculation
     int loyaltyYears = customer.calculateLoyaltyYears();
     assert(loyaltyYears >= 0);
     
-    // Test premium eligibility
     bool canApply = customer.canApplyForPremium();
-    assert(canApply == true || canApply == false); // Can be either
+    assert(canApply == true || canApply == false);
     
     std::cout << "✅ testCustomerOperations: PASSED" << std::endl;
 }
@@ -73,7 +79,6 @@ void testCustomerOperations() {
 void testCustomerPhoneValidation() {
     std::cout << "Testing Customer phone validation..." << std::endl;
     
-    // Test valid phone numbers
     minimarket::users::Customer valid1("CUST002", "Valid1", "test1@email.com", "+1-234-567-8900");
     assert(valid1.validatePhoneNumber() == true);
     
@@ -83,7 +88,6 @@ void testCustomerPhoneValidation() {
     minimarket::users::Customer valid3("CUST004", "Valid3", "test3@email.com", "1234567890");
     assert(valid3.validatePhoneNumber() == true);
     
-    // Test invalid phone numbers
     minimarket::users::Customer invalid1("CUST005", "Invalid1", "test4@email.com", "123");
     assert(invalid1.validatePhoneNumber() == false);
     
@@ -98,27 +102,20 @@ void testEmployeeOperations() {
     
     minimarket::users::Employee employee("EMP001", "Jane Employee", "jane@bank.com", "Loans", 50000.0);
     
-    // Test employee creation
-    assert(employee.getEmployeeId() == "EMP001");
+    assert(employee.getUserId() == "EMP001");
     assert(employee.getDepartment() == "Loans");
     assert(employee.getSalary() == 50000.0);
     
-    // Проверяем роль - может возвращать "Employee" или другую строку
     std::string role = employee.getUserRole();
-    assert(!role.empty()); // Просто проверяем что роль не пустая
+    assert(!role.empty());
     std::cout << "Employee role: " << role << std::endl;
     
-    // Test loan approval capability
-    bool canApprove = employee.approveLoanApplication(25000.0);
-    assert(canApprove == true); // Should approve within limits
+    assert(employee.approveLoanApplication(25000.0) == true);
     
-    // Test annual bonus calculation
     double bonus = employee.calculateAnnualBonus();
-    assert(bonus == 7500.0); // 15% of 50000
+    assert(bonus == 7500.0);
     
-    // Test sensitive data access
-    bool canAccess = employee.canAccessSensitiveData();
-    assert(canAccess == false); // Loans department cannot access sensitive data
+    assert(employee.canAccessSensitiveData() == false);
     
     std::cout << "✅ testEmployeeOperations: PASSED" << std::endl;
 }
@@ -126,18 +123,15 @@ void testEmployeeOperations() {
 void testEmployeeLoanApproval() {
     std::cout << "Testing Employee loan approval..." << std::endl;
     
-    // Test loan officer
     minimarket::users::Employee loanOfficer("EMP002", "Loan Officer", "loans@bank.com", "Loans", 45000.0);
     assert(loanOfficer.approveLoanApplication(20000.0) == true);
-    assert(loanOfficer.approveLoanApplication(120000.0) == false); // Too high
+    assert(loanOfficer.approveLoanApplication(120000.0) == false);
     
-    // Test non-loan department
     minimarket::users::Employee marketingEmp("EMP003", "Marketer", "marketing@bank.com", "Marketing", 40000.0);
-    assert(marketingEmp.approveLoanApplication(10000.0) == false); // Wrong department
+    assert(marketingEmp.approveLoanApplication(10000.0) == false);
     
-    // Test low salary employee
     minimarket::users::Employee lowSalaryEmp("EMP004", "Junior", "junior@bank.com", "Loans", 25000.0);
-    assert(lowSalaryEmp.approveLoanApplication(5000.0) == false); // Salary too low
+    assert(lowSalaryEmp.approveLoanApplication(5000.0) == false);
     
     std::cout << "✅ testEmployeeLoanApproval: PASSED" << std::endl;
 }
@@ -145,7 +139,6 @@ void testEmployeeLoanApproval() {
 void testEmployeeDataAccess() {
     std::cout << "Testing Employee data access..." << std::endl;
     
-    // Test departments with sensitive data access
     minimarket::users::Employee hrEmployee("EMP005", "HR Staff", "hr@bank.com", "HR", 60000.0);
     assert(hrEmployee.canAccessSensitiveData() == true);
     
@@ -155,7 +148,6 @@ void testEmployeeDataAccess() {
     minimarket::users::Employee itEmployee("EMP007", "IT Staff", "it@bank.com", "IT", 80000.0);
     assert(itEmployee.canAccessSensitiveData() == true);
     
-    // Test departments without sensitive data access
     minimarket::users::Employee marketingEmployee("EMP008", "Marketer", "marketing@bank.com", "Marketing", 50000.0);
     assert(marketingEmployee.canAccessSensitiveData() == false);
     
@@ -170,25 +162,19 @@ void testAdminOperations() {
     
     minimarket::users::Admin admin("ADM001", "Super Admin", "admin@system.com", "SuperAdmin");
     
-    // Test admin creation
+    assert(admin.getUserId() == "ADM001");
     assert(admin.getAdminLevel() == "SuperAdmin");
     
-    // Проверяем роль - может возвращать "Admin" или другую строку
     std::string role = admin.getUserRole();
-    assert(!role.empty()); // Просто проверяем что роль не пустая
+    assert(!role.empty());
     std::cout << "Admin role: " << role << std::endl;
     
-    // Test permission granting
     assert(admin.grantPermissions("user_management") == true);
     assert(admin.grantPermissions("system_config") == true);
     
-    // Test user access revocation
-    bool canRevoke = admin.revokeUserAccess("USER123");
-    assert(canRevoke == true); // SuperAdmin can revoke
+    assert(admin.revokeUserAccess("USER123") == true);
     
-    // Test system settings modification
-    bool canModify = admin.canModifySystemSettings();
-    assert(canModify == true);
+    assert(admin.canModifySystemSettings() == true);
     
     std::cout << "✅ testAdminOperations: PASSED" << std::endl;
 }
@@ -196,17 +182,14 @@ void testAdminOperations() {
 void testAdminLevels() {
     std::cout << "Testing Admin levels..." << std::endl;
     
-    // Test SuperAdmin
     minimarket::users::Admin superAdmin("ADM002", "Super", "super@admin.com", "SuperAdmin");
     assert(superAdmin.canModifySystemSettings() == true);
     assert(superAdmin.revokeUserAccess("ANYUSER") == true);
     
-    // Test SystemAdmin
     minimarket::users::Admin systemAdmin("ADM003", "System", "system@admin.com", "SystemAdmin");
     assert(systemAdmin.canModifySystemSettings() == true);
-    assert(systemAdmin.revokeUserAccess("ANYUSER") == false); // Cannot revoke
+    assert(systemAdmin.revokeUserAccess("ANYUSER") == false);
     
-    // Test Regular Admin
     minimarket::users::Admin regularAdmin("ADM004", "Regular", "regular@admin.com", "Admin");
     assert(regularAdmin.canModifySystemSettings() == false);
     assert(regularAdmin.revokeUserAccess("ANYUSER") == false);
@@ -219,20 +202,16 @@ void testUserProfile() {
     
     minimarket::users::UserProfile profile("USER003", "John", "Doe", "15/05/1990");
     
-    // Test profile creation
     assert(profile.getUserId() == "USER003");
     assert(profile.getFirstName() == "John");
     assert(profile.getLastName() == "Doe");
     assert(profile.getDateOfBirth() == "15/05/1990");
     
-    // Test full name generation
     assert(profile.getFullName() == "John Doe");
     
-    // Test age calculation
     int age = profile.calculateAge();
-    assert(age > 20 && age < 50); // Reasonable range for 1990 birth
+    assert(age > 20 && age < 50);
     
-    // Test adult verification
     assert(profile.isAdult() == true);
     
     std::cout << "✅ testUserProfile: PASSED" << std::endl;
@@ -241,17 +220,13 @@ void testUserProfile() {
 void testUserProfileAge() {
     std::cout << "Testing UserProfile age calculations..." << std::endl;
     
-    // Test adult profile
     minimarket::users::UserProfile adult("USER004", "Adult", "User", "01/01/2000");
     assert(adult.isAdult() == true);
     
-    // Test invalid date format - метод может возвращать 0 или другое значение
     minimarket::users::UserProfile invalidDate("USER005", "Invalid", "Date", "2000-01-01");
     int age = invalidDate.calculateAge();
-    
-    // Просто проверяем что метод не падает и возвращает какое-то значение
     std::cout << "Invalid date age calculation: " << age << std::endl;
-    assert(age >= 0); // Возраст не может быть отрицательным
+    assert(age >= 0);
     
     std::cout << "✅ testUserProfileAge: PASSED" << std::endl;
 }
@@ -261,21 +236,17 @@ void testAddressOperations() {
     
     minimarket::users::Address address("123 Main Street", "New York", "10001", "USA");
     
-    // Test address creation
     assert(address.getStreet() == "123 Main Street");
     assert(address.getCity() == "New York");
     assert(address.getPostalCode() == "10001");
     assert(address.getCountry() == "USA");
     
-    // Test address validation
     assert(address.validateAddress() == true);
     
-    // Test formatted address
     std::string formatted = address.getFormattedAddress();
     assert(formatted == "123 Main Street, New York, 10001, USA");
     
-    // Test international address detection
-    assert(address.isInternational() == false); // USA is not international
+    assert(address.isInternational() == false);
     
     std::cout << "✅ testAddressOperations: PASSED" << std::endl;
 }
@@ -283,14 +254,12 @@ void testAddressOperations() {
 void testInternationalAddress() {
     std::cout << "Testing international addresses..." << std::endl;
     
-    // Test US address (not international)
     minimarket::users::Address usAddress("456 Oak Ave", "Chicago", "60007", "USA");
     assert(usAddress.isInternational() == false);
     
     minimarket::users::Address usAddress2("789 Pine St", "Los Angeles", "90001", "United States");
     assert(usAddress2.isInternational() == false);
     
-    // Test international addresses
     minimarket::users::Address canadaAddress("123 Maple Rd", "Toronto", "M5V 2T6", "Canada");
     assert(canadaAddress.isInternational() == true);
     
@@ -305,18 +274,14 @@ void testContactInfo() {
     
     minimarket::users::ContactInfo contact("+1-234-567-8900", "contact@example.com", "+1-987-654-3210");
     
-    // Test contact creation
     assert(contact.getPhoneNumber() == "+1-234-567-8900");
     assert(contact.getEmail() == "contact@example.com");
     assert(contact.getEmergencyContact() == "+1-987-654-3210");
     
-    // Test contact validation
     assert(contact.validateContactInfo() == true);
     
-    // Test primary contact
     assert(contact.getPrimaryContact() == "+1-234-567-8900");
     
-    // Test emergency contact presence
     assert(contact.hasEmergencyContact() == true);
     
     std::cout << "✅ testContactInfo: PASSED" << std::endl;
@@ -325,19 +290,15 @@ void testContactInfo() {
 void testContactValidation() {
     std::cout << "Testing ContactInfo validation..." << std::endl;
     
-    // Test valid contact info
     minimarket::users::ContactInfo valid("1234567890", "valid@email.com", "0987654321");
     assert(valid.validateContactInfo() == true);
     
-    // Test invalid email
     minimarket::users::ContactInfo invalidEmail("1234567890", "invalid-email", "0987654321");
     assert(invalidEmail.validateContactInfo() == false);
     
-    // Test invalid phone
     minimarket::users::ContactInfo invalidPhone("123", "valid@email.com", "0987654321");
     assert(invalidPhone.validateContactInfo() == false);
     
-    // Test no emergency contact
     minimarket::users::ContactInfo noEmergency("1234567890", "valid@email.com", "");
     assert(noEmergency.hasEmergencyContact() == false);
     
@@ -349,13 +310,11 @@ void testLoginCredentials() {
     
     minimarket::users::LoginCredentials credentials("johndoe", "SecurePass123!");
     
-    // Test password verification
     assert(credentials.verifyPassword("SecurePass123!") == true);
     assert(credentials.verifyPassword("wrongpassword") == false);
     
-    // Test password expiration
     bool isExpired = credentials.isPasswordExpired();
-    assert(isExpired == false); // Newly created password shouldn't be expired
+    assert(isExpired == false);
     
     std::cout << "✅ testLoginCredentials: PASSED" << std::endl;
 }
@@ -365,17 +324,14 @@ void testPasswordManagement() {
     
     minimarket::users::LoginCredentials credentials("testuser", "OldPassword123!");
     
-    // Test valid password update
     credentials.updatePassword("NewSecurePass456!");
     assert(credentials.verifyPassword("NewSecurePass456!") == true);
     assert(credentials.verifyPassword("OldPassword123!") == false);
     
-    // Test invalid password update (too short)
     try {
         credentials.updatePassword("short");
-        assert(false); // Should not reach here
+        assert(false);
     } catch (const minimarket::exceptions::InvalidPasswordException&) {
-        // Expected
     }
     
     std::cout << "✅ testPasswordManagement: PASSED" << std::endl;
@@ -386,14 +342,11 @@ void testUserSession() {
     
     minimarket::users::UserSession session("SESS001", "USER006");
     
-    // Test session creation
     assert(session.getSessionId() == "SESS001");
     assert(session.getUserId() == "USER006");
     
-    // Test session validity
-    assert(session.isSessionValid() == true); // New session should be valid
+    assert(session.isSessionValid() == true);
     
-    // Test session duration
     int duration = session.calculateSessionDuration();
     assert(duration >= 0);
     
@@ -405,26 +358,22 @@ void testUserPreferences() {
     
     minimarket::users::UserPreferences prefs("USER007", "en");
     
-    // Test preferences creation
     assert(prefs.getUserId() == "USER007");
     assert(prefs.getLanguage() == "en");
     
-    // Test setting preferences
     assert(prefs.setPreference("theme", "dark") == true);
     assert(prefs.setPreference("notifications", "disabled") == true);
-    assert(prefs.setPreference("", "value") == false); // Empty key
-    assert(prefs.setPreference("key", "") == false); // Empty value
+    assert(prefs.setPreference("", "value") == false);
+    assert(prefs.setPreference("key", "") == false);
     
-    // Test getting preferences
     assert(prefs.getPreference("theme") == "dark");
     assert(prefs.getPreference("notifications") == "disabled");
     assert(prefs.getPreference("nonexistent").empty() == true);
     
-    // Test language support
     assert(prefs.supportsLanguage("en") == true);
     assert(prefs.supportsLanguage("es") == true);
     assert(prefs.supportsLanguage("fr") == true);
-    assert(prefs.supportsLanguage("xx") == false); // Unsupported language
+    assert(prefs.supportsLanguage("xx") == false);
     
     std::cout << "✅ testUserPreferences: PASSED" << std::endl;
 }
@@ -432,16 +381,13 @@ void testUserPreferences() {
 void testUserIntegration() {
     std::cout << "Testing User integration..." << std::endl;
     
-    // Create a complete user profile
     minimarket::users::Customer customer("CUST007", "Integration User", "integration@test.com", "+1234567890");
-    
     minimarket::users::UserProfile profile("CUST007", "Integration", "User", "01/01/1985");
     minimarket::users::Address address("789 Integration St", "Test City", "12345", "USA");
     minimarket::users::ContactInfo contact("+1234567890", "integration@test.com", "+0987654321");
     minimarket::users::LoginCredentials credentials("integration_user", "SecurePass123!");
     minimarket::users::UserPreferences prefs("CUST007", "en");
     
-    // Verify all components work together
     assert(customer.validatePhoneNumber() == true);
     assert(profile.isAdult() == true);
     assert(address.validateAddress() == true);
@@ -455,21 +401,17 @@ void testUserIntegration() {
 void testUserExceptions() {
     std::cout << "Testing User exceptions..." << std::endl;
     
-    // Test invalid user creation
     try {
         minimarket::users::User invalidUser("", "username", "email@test.com");
-        assert(false); // Should not reach here
+        assert(false);
     } catch (const minimarket::exceptions::DataValidationException&) {
-        // Expected
     }
     
-    // Test invalid password update
     try {
         minimarket::users::LoginCredentials creds("test", "oldpass");
         creds.updatePassword("short");
-        assert(false); // Should not reach here
+        assert(false);
     } catch (const minimarket::exceptions::InvalidPasswordException&) {
-        // Expected
     }
     
     std::cout << "✅ testUserExceptions: PASSED" << std::endl;

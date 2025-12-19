@@ -1,5 +1,5 @@
 CMakeFiles/run_tests.dir/tests/main_test.cpp.o: \
-  /Users/glebmitko/Desktop/lab1_minimarket/tests/main_test.cpp \
+  /Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/tests/main_test.cpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/iostream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__assert \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__config \
