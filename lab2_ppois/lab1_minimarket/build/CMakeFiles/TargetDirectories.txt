@@ -1,7 +1,0 @@
-/Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/build/CMakeFiles/lab_work.dir
-/Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/build/CMakeFiles/run_tests.dir
-/Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/build/CMakeFiles/coverage.dir
-/Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/build/CMakeFiles/run-tests.dir
-/Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/build/CMakeFiles/test.dir
-/Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/build/CMakeFiles/edit_cache.dir
-/Users/glebmitko/Desktop/lab_ppois/lab2_ppois/lab1_minimarket/build/CMakeFiles/rebuild_cache.dir

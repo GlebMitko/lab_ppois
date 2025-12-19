@@ -1,0 +1,9 @@
+# IDE
+.idea/
+
+# Build directories (anywhere)
+build/
+**/build/
+
+# macOS
+.DS_Store
